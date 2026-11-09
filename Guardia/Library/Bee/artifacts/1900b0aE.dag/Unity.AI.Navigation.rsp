@@ -140,6 +140,7 @@
 -define:TEXTCORE_TEXT_ENGINE_1_5_OR_NEWER
 -define:TEXTCORE_FONT_ENGINE_1_6_OR_NEWER
 -define:NMC_CAN_ACCESS_TERRAIN
+-define:NMC_CAN_ACCESS_PHYSICS
 -define:CSHARP_7_OR_LATER
 -define:CSHARP_7_3_OR_NEWER
 -r:"C:/Program Files/Unity/Hub/Editor/6000.4.12f1/Editor/Data/Managed/UnityEditor.Graphs.dll"
@@ -423,13 +424,13 @@
 -analyzer:"C:/Program Files/Unity/Hub/Editor/6000.4.12f1/Editor/Data/Tools/BuildPipeline/Unity.SourceGenerators/Unity.Properties.SourceGenerator.dll"
 -analyzer:"C:/Program Files/Unity/Hub/Editor/6000.4.12f1/Editor/Data/Tools/BuildPipeline/Unity.SourceGenerators/Unity.SourceGenerators.dll"
 -analyzer:"C:/Program Files/Unity/Hub/Editor/6000.4.12f1/Editor/Data/Tools/BuildPipeline/Unity.SourceGenerators/Unity.UIToolkit.SourceGenerator.dll"
-"Library/PackageCache/com.unity.ai.navigation@42d896194035/Runtime/AssemblyInfo.cs"
-"Library/PackageCache/com.unity.ai.navigation@42d896194035/Runtime/HelpUrls.cs"
-"Library/PackageCache/com.unity.ai.navigation@42d896194035/Runtime/NavMeshLink.cs"
-"Library/PackageCache/com.unity.ai.navigation@42d896194035/Runtime/NavMeshLink.deprecated.cs"
-"Library/PackageCache/com.unity.ai.navigation@42d896194035/Runtime/NavMeshModifier.cs"
-"Library/PackageCache/com.unity.ai.navigation@42d896194035/Runtime/NavMeshModifierVolume.cs"
-"Library/PackageCache/com.unity.ai.navigation@42d896194035/Runtime/NavMeshSurface.cs"
+"Library/PackageCache/com.unity.ai.navigation@d0cf77b009bb/Runtime/AssemblyInfo.cs"
+"Library/PackageCache/com.unity.ai.navigation@d0cf77b009bb/Runtime/HelpUrls.cs"
+"Library/PackageCache/com.unity.ai.navigation@d0cf77b009bb/Runtime/NavMeshLink.cs"
+"Library/PackageCache/com.unity.ai.navigation@d0cf77b009bb/Runtime/NavMeshLink.deprecated.cs"
+"Library/PackageCache/com.unity.ai.navigation@d0cf77b009bb/Runtime/NavMeshModifier.cs"
+"Library/PackageCache/com.unity.ai.navigation@d0cf77b009bb/Runtime/NavMeshModifierVolume.cs"
+"Library/PackageCache/com.unity.ai.navigation@d0cf77b009bb/Runtime/NavMeshSurface.cs"
 -langversion:9.0
 /deterministic
 /optimize+
