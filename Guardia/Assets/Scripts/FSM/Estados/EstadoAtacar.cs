@@ -10,19 +10,21 @@ namespace UDIT.IA3.Guardia
         {
             AtaqueDistancia disparar = Agente.GetComponent<AtaqueDistancia>();
 
-            if(disparar != null && Pizarra.Get(ClavesBB.Rango, true) && Pizarra.Get(ClavesBB.Visible, true))
+            if(disparar == null )
             {
-
+                //Error
             }
-            else
-            {
 
-            }
+            //Si dispara, se queda quieto 
+            Pizarra.Get(ClavesBB.TieneDestino, false);
+
         }
         internal override void Execute()
         {
             AtaqueDistancia disparar = Agente.GetComponent<AtaqueDistancia>();
             NivelSospecha nivel = Pizarra.Get(ClavesBB.Nivel, NivelSospecha.Alerta);
+            bool enRango = Pizarra.Get(ClavesBB.Rango, true);
+        
 
             if (nivel == NivelSospecha.Sospecha)
             {
@@ -30,14 +32,27 @@ namespace UDIT.IA3.Guardia
                 // StateMachine.ChangeState(new EstadoInvestigar(StateMachine));
                 return;
             }
+
+            //Rango
+            if(!enRango)
+            {
+                if(Pizarra.Get(ClavesBB.TieneUltimaPos,false))
+                {
+                    Pizarra.Get(ClavesBB.Destino, Pizarra.Get(ClavesBB.UltimaPos, Agente.transform.position));
+                    Pizarra.Get(ClavesBB.TieneDestino, true);
+                }
+            }
+
+            Pizarra.Get(ClavesBB.TieneDestino, false);
             if (disparar.balas == 0)
             {
                 disparar.Recargar();
             }
 
-            if (Pizarra.Get(ClavesBB.Rango, true) && disparar.balas > 0)
+            if (disparar.balas > 0)
             {
-                disparar.Disparar();
+                Vector3 Objetivo = Pizarra.Get(ClavesBB.UltimaPos, Agente.transform.position);
+                disparar.Disparar(Objetivo);
             }
 
         }

@@ -17,7 +17,7 @@ namespace UDIT.IA3.Guardia
         {
             balas = balasCargador;
         }
-        public void Disparar()
+        public void Disparar(Vector3 Objetivo)
         {
             balas--;
         }
