@@ -59,5 +59,7 @@ namespace UDIT.IA3.Guardia
 
         /// <summary>bool · alerta de grupo. La escribe OTRO guardia, con latencia.</summary>
         public const string AlertaDeGrupo = "alertaDeGrupo";
+
+        public const string Rango = "rango";
     }
 }
