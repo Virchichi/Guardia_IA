@@ -57,6 +57,7 @@ namespace UDIT.IA3.Guardia
             {
                 // TODO · descomentad cuando tengáis EstadoPerseguir
                 // StateMachine.ChangeState(new EstadoPerseguir(StateMachine));
+                StateMachine.ChangeState(new EstadoAtacar(StateMachine));
                 return;
             }
 

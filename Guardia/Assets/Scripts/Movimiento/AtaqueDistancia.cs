@@ -15,6 +15,10 @@ namespace UDIT.IA3.Guardia
         public float alturaApuntado = 1f; //altura del pecho 
         private float _proximoDisparo;
         // Start is called once before the first execution of Update after the MonoBehaviour is created
+
+        public float timepoRecarga = 3f;
+        public bool recargando = false;
+        private float _terminarRecarga;
         void Start()
         {
             balas = balasCargador;
@@ -22,11 +26,20 @@ namespace UDIT.IA3.Guardia
 
         public void Recargar()
         {
-            balas = balasCargador;
+            if (!recargando)_terminarRecarga = Time.time + timepoRecarga;
+   
+            if (Time.time < _terminarRecarga)
+            { recargando = true; }
+            else
+            {
+                balas = balasCargador;
+                recargando = false;
+            }
+
         }
         public bool Disparar(Vector3 posicionObjetivo) //Devuelve true si sale la bala, sino devuelve false
         {
-            if ( balas <= 0 || Time.time < _proximoDisparo) return false;
+            if ( balas <= 0 || Time.time < _proximoDisparo || recargando) return false;
 
             if (prefabBala == null) return false;
 
