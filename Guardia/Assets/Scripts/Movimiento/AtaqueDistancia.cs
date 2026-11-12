@@ -7,6 +7,13 @@ namespace UDIT.IA3.Guardia
     {
         int balasCargador = 15;
         public int balas = 0;
+       public Bala prefabBala; //Nombre del script de la bala 
+        public Transform puntoDisparo; //Desde donde se va a disparar la bala  
+
+        public float cadencia = 0.5f; //Segundos minimos entre disparos
+
+        public float alturaApuntado = 1f; //altura del pecho 
+        private float _proximoDisparo;
         // Start is called once before the first execution of Update after the MonoBehaviour is created
         void Start()
         {
@@ -17,9 +24,33 @@ namespace UDIT.IA3.Guardia
         {
             balas = balasCargador;
         }
-        public void Disparar(Vector3 Objetivo)
+        public bool Disparar(Vector3 posicionObjetivo) //Devuelve true si sale la bala, sino devuelve false
         {
+            if ( balas <= 0 || Time.time < _proximoDisparo) return false;
+
+            if (prefabBala == null) return false;
+
+
+            Vector3 origen = puntoDisparo != null
+                  ? puntoDisparo.position
+                  : transform.position + Vector3.up * 1.5f;
+
+            Vector3 objetivo = posicionObjetivo + Vector3.up * alturaApuntado;
+            Vector3 direccion = CalcularDireccion(objetivo - origen);
+
+            Bala bala = Instantiate(prefabBala, origen, Quaternion.LookRotation(direccion));
+            bala.Lanzar(direccion, transform);
+
+
             balas--;
+            _proximoDisparo = Time.time + cadencia;
+            return true;
+        }
+        private Vector3 CalcularDireccion(Vector3 haciaObjetivo)
+        {
+            Quaternion apunte = Quaternion.LookRotation(haciaObjetivo.normalized);
+            return apunte  * Vector3.forward;
+
         }
 
     }

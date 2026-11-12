@@ -30,7 +30,7 @@ namespace UDIT.IA3.Guardia
             {
                 // TODO · descomentad cuando tengáis EstadoInvestigar
                 // StateMachine.ChangeState(new EstadoInvestigar(StateMachine));
-                return;
+               // return;
             }
 
             //Rango

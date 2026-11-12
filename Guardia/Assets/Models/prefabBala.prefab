@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 8440808559978592663}
   - component: {fileID: 5926543355156455769}
   - component: {fileID: -4561760674004908953}
+  - component: {fileID: 114296992557126610}
   m_Layer: 0
   m_Name: prefabBala
   m_TagString: Untagged
@@ -68,7 +69,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: a63fe1289de40b440b0676791b2a1686, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -107,7 +108,7 @@ CapsuleCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
@@ -124,7 +125,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1932506086309549309}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8f93d04394c460b4fb72943ad03d43c1, type: 3}
+  m_Script: {fileID: 11500000, guid: 7eae0014c0c311f44a1b222cfdc3a72e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UDIT.IA3.Guardia.Bala
   velocidad: 40
@@ -132,3 +133,30 @@ MonoBehaviour:
   capasImpacto:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!54 &114296992557126610
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1932506086309549309}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 1
+  m_Constraints: 0
+  m_CollisionDetection: 2
