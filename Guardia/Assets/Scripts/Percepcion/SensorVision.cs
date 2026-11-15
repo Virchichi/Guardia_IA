@@ -15,14 +15,34 @@
 //  enunciado es convertir esto en un sensor que se pueda defender:
 //
 //     ETAPA 1  alcance   ✅ hecho (es lo único que hay)
-//     ETAPA 2  ángulo    ❌ TODO
-//     ETAPA 3  oclusión  ❌ TODO   ← y con VARIOS puntos, no solo el centro
-//     MEDIDOR  sospecha  ❌ TODO   ← 3 factores, decaimiento, histéresis
+//     ETAPA 2  ángulo    ✅ HECHO  (en el plano horizontal)
+//     ETAPA 3  oclusión  ✅ HECHO  (raycast a cabeza, torso y pies)
+//     MEDIDOR  sospecha  ✅ HECHO  (4 factores por producto con mínimos,
+//                                   decaimiento con retardo, histéresis)
 //
 //  Filtrar barato antes de filtrar caro (sesión 4): el orden de las tres
 //  etapas no es casual. La comprobación de distancia es un producto escalar;
 //  el raycast es una consulta al motor de físicas. Poner el raycast primero
 //  «funciona» y cuesta veinte veces más.
+//
+//  ── RESUMEN DE LO QUE HEMOS HECHO (para la memoria) ─────────────────────
+//
+//  · Evidencia = fDistancia · fAngulo · fVisibilidad · fMovimiento
+//      Producto: las malas condiciones se acumulan (lejos Y de reojo Y medio
+//      tapado casi no se nota). Pero cada factor tiene un MÍNIMO para que
+//      ninguno por sí solo anule la detección: un jugador quieto delante de
+//      las narices del guardia se tiene que ver.
+//
+//  · Para que el medidor NO FLUCTÚE:
+//      1. Sube integrando evidencia·dt: nunca salta, siempre es progresivo.
+//      2. Tiempo de gracia: perder de vista al jugador 1-2 frames (esquina,
+//         borde del cono) no cuenta como «perderlo».
+//      3. Retardo de olvido: tras perderlo, la sospecha se mantiene un rato
+//         antes de empezar a bajar. Así no hay dientes de sierra si el
+//         jugador entra y sale del cono.
+//      4. Histéresis en los umbrales (método del profesor, abajo).
+//
+//  · Nervio: cada vez que lo pierde (VecesPerdido) olvida más despacio.
 // ═══════════════════════════════════════════════════════════════════════════
 
 using UnityEngine;
@@ -49,6 +69,18 @@ namespace UDIT.IA3.Guardia
                  "Si dejáis esto en Nothing, no habrá oclusión y se notará.")]
         public LayerMask CapasQueOcluyen;
 
+        //----------------------------------------------------------------------------
+        //            NUESTRO
+        [Header("Puntos del objetivo para la oclusión")]
+        [Tooltip("Altura sobre el pivote del objetivo de cada raycast. Por defecto, " +
+                 "pivote en los PIES (personaje de Mixamo / CharacterController). " +
+                 "Con la cápsula de Unity (pivote en el centro): 0.8, 0 y -0.9.")]
+        public float AlturaCabeza = 1.6f;
+        public float AlturaTorso = 0.9f;
+        public float AlturaPies = 0.1f;
+
+        //----------------------------------------------------------------------------
+
         [Header("Medidor de sospecha — APARTADO A DEL ENUNCIADO")]
         [Tooltip("Cuánto sube por segundo con evidencia máxima.")]
         public float VelocidadSubida = 0.8f;
@@ -66,16 +98,66 @@ namespace UDIT.IA3.Guardia
         [Tooltip("Cuánto hay que bajar por debajo del umbral para volver atrás. " +
                  "Sin esto el guardia parpadea entre estados. Es la HISTÉRESIS.")]
         [Range(0f, 0.5f)] public float Histeresis = 0.1f;
+        /// <summary>
+        /// NUESTRO
+        /// </summary>
+        [Header("Factores de la evidencia")]
+        [Tooltip("A esta distancia o menos, el factor distancia vale 1 (máximo).")]
+        public float DistanciaCercana = 2f;
+
+        [Tooltip("Velocidad del jugador (m/s) a partir de la cual el factor movimiento vale 1. " +
+                 "Corriendo se nota más que andando, y andando más que quieto.")]
+        public float VelocidadMuyLlamativa = 5f;
+
+        [Tooltip("Mínimo de cada factor: evita que uno solo anule la detección por producto.")]
+        [Range(0f, 1f)] public float MinimoDistancia = 0.2f;
+        [Range(0f, 1f)] public float MinimoAngulo = 0.3f;
+        [Range(0f, 1f)] public float MinimoMovimiento = 0.4f;
+
+        [Header("Estabilidad (que no fluctúe)")]
+        [Tooltip("Segundos sin verlo antes de darlo por PERDIDO. Evita que un parpadeo " +
+                 "de 1-2 frames en una esquina o en el borde del cono cuente como perderlo.")]
+        public float TiempoGracia = 0.25f;
+
+        [Tooltip("Segundos que la sospecha se MANTIENE tras perderlo antes de empezar a bajar.")]
+        public float RetardoOlvido = 1.5f;
+
+        [Tooltip("Cuánto más despacio olvida por cada vez que lo ha perdido (VecesPerdido). " +
+                 "0 = sin efecto. 0.25 con 3 pérdidas → olvida 1,75 veces más lento.")]
+        [Range(0f, 1f)] public float Nervio = 0.25f;
+        [Tooltip("Máximo de pérdidas que cuentan para el nervio, para que no deje de olvidar nunca.")]
+        public int MaxPerdidasNervio = 3;
 
         // Estado interno del sensor. Lo publica en la pizarra al final de Percibir.
         private float _sospecha;
         private NivelSospecha _nivel = NivelSospecha.Tranquilo;
         private bool _visiblePrevio;
 
+        // Para el tiempo de gracia y el retardo de olvido
+        private float _ultimaVezVisto = -999f;
+        private Vector3 _ultimaPosVista;
+
+        // Para el factor movimiento: velocidad del objetivo medida desde fuera
+        // (no le preguntamos nada al script del jugador: el sensor lo OBSERVA).
+        private Vector3 _posObjetivoPrevia;
+        private float _velocidadObjetivo;
+
+        // Resultado de la última comprobación (los usa el medidor)
+        private float _distancia;
+        private float _angulo;
+        private int _rayosQueLlegan;
+
         /// <summary>Solo para los gizmos: si la última comprobación dio positivo.</summary>
         public bool VisibleAhora { get; private set; }
         public float SospechaActual { get { return _sospecha; } }
         public NivelSospecha NivelActual { get { return _nivel; } }
+
+        /// <summary>Para depurar y para la memoria: la evidencia del último frame y sus factores.</summary>
+        public float EvidenciaActual { get; private set; }
+        public float FactorDistancia { get; private set; }
+        public float FactorAngulo { get; private set; }
+        public float FactorVisibilidad { get; private set; }
+        public float FactorMovimiento { get; private set; }
 
         private void Awake()
         {
@@ -86,6 +168,8 @@ namespace UDIT.IA3.Guardia
                 GameObject go = GameObject.FindGameObjectWithTag(TagObjetivo);
                 if (go != null) Objetivo = go.transform;
             }
+
+            if (Objetivo != null) _posObjetivoPrevia = Objetivo.position;
         }
 
         // ───────────────────────────────────────────────────────────────────
@@ -96,12 +180,27 @@ namespace UDIT.IA3.Guardia
         {
             if (Objetivo == null) return;
 
+            float dt = Time.deltaTime;
+            MedirVelocidadObjetivo(dt);
+
             // ── ¿Lo veo? ────────────────────────────────────────────────────
-            bool visible = ComprobarVision();
-            VisibleAhora = visible;
+            bool vistoEsteFrame = ComprobarVision();
+            VisibleAhora = vistoEsteFrame;
+
+            if (vistoEsteFrame)
+            {
+                _ultimaVezVisto = Time.time;
+                _ultimaPosVista = Objetivo.position;
+            }
+
+            // Con TIEMPO DE GRACIA: si lo he dejado de ver hace menos de
+            // TiempoGracia, sigue contando como visible. Un parpadeo de un frame
+            // en una esquina no es «perderlo».
+            float sinVerlo = Time.time - _ultimaVezVisto;
+            bool visible = sinVerlo <= TiempoGracia;
 
             // ── El medidor ──────────────────────────────────────────────────
-            ActualizarSospecha(visible, Time.deltaTime);
+            ActualizarSospecha(vistoEsteFrame, sinVerlo, bb, dt);
 
             // ── Publicar en la pizarra ──────────────────────────────────────
             bb.Set(ClavesBB.Visible, visible);
@@ -111,14 +210,20 @@ namespace UDIT.IA3.Guardia
             // La última posición conocida se escribe EN EL INSTANTE en que se
             // pierde el contacto. Ni antes (aún lo veo) ni después (ya no sé
             // dónde estaba).
+            //
+            // Mientras lo ve también se actualiza: es lo que usa Perseguir
+            // para ir a por él. Al perderlo escribimos dónde lo VIMOS de
+            // verdad por última vez (_ultimaPosVista), no dónde está ahora:
+            // si usáramos Objetivo.position tras el tiempo de gracia, el
+            // guardia sabría dónde se ha escondido sin haberlo visto.
             if (visible)
             {
-                bb.Set(ClavesBB.UltimaPos, Objetivo.position);
+                bb.Set(ClavesBB.UltimaPos, _ultimaPosVista);
                 bb.Set(ClavesBB.TieneUltimaPos, true);
             }
             else if (_visiblePrevio)
             {
-                bb.Set(ClavesBB.UltimaPos, Objetivo.position);
+                bb.Set(ClavesBB.UltimaPos, _ultimaPosVista);
                 bb.Set(ClavesBB.TieneUltimaPos, true);
                 bb.Set(ClavesBB.VecesPerdido, bb.Get(ClavesBB.VecesPerdido, 0) + 1);
             }
@@ -132,76 +237,131 @@ namespace UDIT.IA3.Guardia
 
         private bool ComprobarVision()
         {
+            _rayosQueLlegan = 0;
+
             // ETAPA 1 · ALCANCE ✅
             // Comparamos distancias al cuadrado para ahorrarnos la raíz.
             Vector3 haciaObjetivo = Objetivo.position - Ojos.position;
 
             if (haciaObjetivo.sqrMagnitude > Alcance * Alcance) return false;
 
-            // ETAPA 2 · ÁNGULO ❌ TODO
+            // ETAPA 2 · ÁNGULO ✅
             //
-            // Comprobad que el objetivo cae dentro del cono de AnguloVision
-            // grados alrededor de Ojos.forward.
-            //
-            // Pista: Vector3.Angle(Ojos.forward, haciaObjetivo) <= AnguloVision * 0.5f
-            // Cuidado con el 0.5: AnguloVision es el cono COMPLETO.
-            // Y cuidado con la componente Y si vuestro suelo no es plano.
+            // En el PLANO HORIZONTAL (Y a cero en los dos vectores): si no, el
+            // jugador a los pies del guardia (muy por debajo de los ojos) daría
+            // un ángulo grande y quedaría «fuera del cono» estando delante.
+            // AnguloVision es el cono COMPLETO: comparamos con la mitad.
+            Vector3 adelante = Ojos.forward;
+            adelante.y = 0f;
+            Vector3 haciaPlano = haciaObjetivo;
+            haciaPlano.y = 0f;
 
-            // ETAPA 3 · OCLUSIÓN ❌ TODO
-            //
-            // Lanzad un Physics.Raycast desde Ojos.position hacia VARIOS puntos
-            // del objetivo, no solo hacia su centro. Con tres basta: cabeza
-            // (+1.6f en Y), torso (+0.9f) y pies (+0.1f) si el pivote está en
-            // los pies. La cápsula de Unity lo tiene en el CENTRO: con ella son
-            // +0.8f, 0f y -0.9f (README_Montaje, 3.3).
-            //
-            // Si CUALQUIERA de los tres llega sin chocar contra CapasQueOcluyen,
-            // el objetivo es visible. Devolved además cuántos han llegado: es
-            // un factor estupendo para el medidor (ver «visibilidad parcial»).
-            //
-            // Pista:
-            //   Physics.Raycast(Ojos.position, dir.normalized, dist, CapasQueOcluyen)
-            //   devuelve TRUE si ha chocado, es decir, si NO se ve.
+            _distancia = haciaPlano.magnitude;
+            _angulo = Vector3.Angle(adelante, haciaPlano);
 
-            return true;   // ← mientras no hagáis las etapas 2 y 3, ve a través de las paredes
+            if (_angulo > AnguloVision * 0.5f) return false;
+
+            // ETAPA 3 · OCLUSIÓN ✅
+            //
+            // Un raycast a cabeza, torso y pies. Si CUALQUIERA llega sin chocar
+            // contra CapasQueOcluyen, se ve. Contamos cuántos llegan: es el
+            // factor «visibilidad parcial» del medidor (asomar solo la cabeza
+            // por encima de una caja se nota menos que estar a cuerpo entero).
+            //
+            // Physics.Raycast devuelve TRUE si ha chocado, es decir, si NO se ve.
+            // Ignoramos triggers: un volumen invisible no tapa la vista.
+            Vector3 pivote = Objetivo.position;
+            if (RayoLlega(pivote + Vector3.up * AlturaCabeza)) _rayosQueLlegan++;
+            if (RayoLlega(pivote + Vector3.up * AlturaTorso))  _rayosQueLlegan++;
+            if (RayoLlega(pivote + Vector3.up * AlturaPies))   _rayosQueLlegan++;
+
+            return _rayosQueLlegan > 0;
+        }
+
+        private bool RayoLlega(Vector3 punto)
+        {
+            Vector3 dir = punto - Ojos.position;
+            float dist = dir.magnitude;
+            if (dist < 0.001f) return true;
+
+            bool choca = Physics.Raycast(Ojos.position, dir / dist, dist,
+                                         CapasQueOcluyen, QueryTriggerInteraction.Ignore);
+#if UNITY_EDITOR
+            Debug.DrawLine(Ojos.position, punto, choca ? Color.red : Color.green);
+#endif
+            return !choca;
+        }
+
+        /// <summary>
+        /// Velocidad del objetivo medida por diferencia de posiciones y
+        /// suavizada, para que un frame raro no dispare el factor movimiento.
+        /// </summary>
+        private void MedirVelocidadObjetivo(float dt)
+        {
+            if (dt <= 0f) return;
+
+            Vector3 delta = Objetivo.position - _posObjetivoPrevia;
+            delta.y = 0f;   // saltar o subir escaleras no cuenta como «moverse más»
+            float instantanea = delta.magnitude / dt;
+
+            float suavizado = 1f - Mathf.Exp(-10f * dt);
+            _velocidadObjetivo = Mathf.Lerp(_velocidadObjetivo, instantanea, suavizado);
+            _posObjetivoPrevia = Objetivo.position;
         }
 
         // ───────────────────────────────────────────────────────────────────
         //  EL MEDIDOR DE SOSPECHA
         // ───────────────────────────────────────────────────────────────────
 
-        private void ActualizarSospecha(bool visible, float dt)
+        private void ActualizarSospecha(bool vistoEsteFrame, float sinVerlo, Blackboard bb, float dt)
         {
-            // TODO · APARTADO A.2 y A.3 del enunciado
-            //
-            // Ahora mismo esto es un INTERRUPTOR: 0 o 1, sin matices y sin
-            // memoria. Es justo lo que el enunciado os pide sustituir.
-            //
-            // Lo que tiene que hacer:
-            //
-            //  1) Si es visible, calcular la EVIDENCIA en [0,1] combinando al
-            //     menos TRES factores:
-            //        · distancia  — más cerca, más evidencia
-            //        · ángulo     — más centrado en el cono, más evidencia
-            //        · uno vuestro — iluminación, si se mueve, si va agachado,
-            //                        cuántos raycasts han llegado, tiempo
-            //                        continuado en el cono...
-            //
-            //     Y DECIDID si los combináis por PRODUCTO o por MEDIA. No es lo
-            //     mismo (sesión 4, «Producto o suma» de B2.1b): con el producto, un solo
-            //     factor a cero anula la detección; con la media, no. Es una
-            //     decisión de diseño y hay que justificarla en la memoria.
-            //
-            //  2) Subir:  _sospecha += evidencia * VelocidadSubida * dt
-            //     Bajar:  _sospecha -= VelocidadBajada * dt
-            //     ...y Mathf.Clamp01 al final. La ASIMETRÍA entre las dos
-            //     velocidades ES el comportamiento: sube en 1-2 s, olvida en
-            //     10-15 s.
-            //
-            //  3) Cruzar umbrales CON HISTÉRESIS (método de abajo).
+            if (vistoEsteFrame)
+            {
+                // ── 1) EVIDENCIA en [0,1] ───────────────────────────────────
+                //
+                // · Distancia: 1 a DistanciaCercana o menos, baja hasta el alcance.
+                // · Ángulo: 1 en el centro del cono, baja hacia los bordes
+                //   (la visión periférica nota menos).
+                // · Visibilidad parcial: rayos que llegan / 3.
+                // · Movimiento (el nuestro): quieto se nota menos que corriendo.
+                //
+                // PRODUCTO con mínimos (Lerp desde el mínimo hasta 1): las malas
+                // condiciones se acumulan, pero ningún factor solo la anula.
+                float medioCono = Mathf.Max(0.01f, AnguloVision * 0.5f);
 
-            _sospecha = visible ? 1f : 0f;          // ← interruptor. Sustituidlo.
+                FactorDistancia = Mathf.Lerp(MinimoDistancia, 1f,
+                    Mathf.InverseLerp(Alcance, DistanciaCercana, _distancia));
 
+                FactorAngulo = Mathf.Lerp(MinimoAngulo, 1f,
+                    Mathf.InverseLerp(medioCono, 0f, _angulo));
+
+                FactorVisibilidad = _rayosQueLlegan / 3f;
+
+                FactorMovimiento = Mathf.Lerp(MinimoMovimiento, 1f,
+                    Mathf.InverseLerp(0f, VelocidadMuyLlamativa, _velocidadObjetivo));
+
+                EvidenciaActual = FactorDistancia * FactorAngulo * FactorVisibilidad * FactorMovimiento;
+
+                // ── 2) SUBIR: progresivo, nunca a saltos ────────────────────
+                _sospecha += EvidenciaActual * VelocidadSubida * dt;
+            }
+            else
+            {
+                EvidenciaActual = 0f;
+
+                // ── 2) BAJAR: solo tras el RETARDO de olvido, y más despacio
+                //       cuanto más «nervioso» esté (veces que lo ha perdido).
+                if (sinVerlo > RetardoOlvido)
+                {
+                    int perdidas = Mathf.Min(bb.Get(ClavesBB.VecesPerdido, 0), MaxPerdidasNervio);
+                    float bajada = VelocidadBajada / (1f + Nervio * perdidas);
+                    _sospecha -= bajada * dt;
+                }
+            }
+
+            _sospecha = Mathf.Clamp01(_sospecha);
+
+            // ── 3) Cruzar umbrales CON HISTÉRESIS ──────────────────────────
             _nivel = ActualizarNivel(_sospecha, _nivel);
         }
 

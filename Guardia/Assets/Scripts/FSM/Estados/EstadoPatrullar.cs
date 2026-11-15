@@ -31,6 +31,7 @@ namespace UDIT.IA3.Guardia
             {
                 Pizarra.Set(ClavesBB.Destino, ruta.PuntoActual);
                 Pizarra.Set(ClavesBB.TieneDestino, true);
+                Pizarra.Set(ClavesBB.HaLlegado, false);
             }
             else
             {
@@ -41,6 +42,8 @@ namespace UDIT.IA3.Guardia
                     "[" + Agente.name + "] no tiene RutaPatrulla con puntos. " +
                     "Mirad los apartados 3.4 y 3.5 del README_Montaje.", Agente);
             }
+
+            Agente.Animator.CrossFade("Walk", 0.1f);
         }
 
         internal override void Execute()
@@ -55,15 +58,13 @@ namespace UDIT.IA3.Guardia
 
             if (nivel == NivelSospecha.Alerta)
             {
-                // TODO · descomentad cuando tengáis EstadoPerseguir
-                // StateMachine.ChangeState(new EstadoPerseguir(StateMachine));
+                StateMachine.ChangeState(new EstadoPerseguir(StateMachine));
                 return;
             }
 
             if (nivel == NivelSospecha.Sospecha)
             {
-                // TODO · descomentad cuando tengáis EstadoInvestigar
-                // StateMachine.ChangeState(new EstadoInvestigar(StateMachine));
+                StateMachine.ChangeState(new EstadoInvestigar(StateMachine));
                 return;
             }
 
@@ -73,9 +74,11 @@ namespace UDIT.IA3.Guardia
                 RutaPatrulla ruta = Agente.GetComponent<RutaPatrulla>();
                 if (ruta != null && ruta.TieneRuta)
                 {
-                    Pizarra.Set(ClavesBB.Destino, ruta.Avanzar());
-                    Pizarra.Set(ClavesBB.TieneDestino, true);
+                    ruta.Avanzar();
                 }
+
+                StateMachine.ChangeState(new EstadoIdle(StateMachine));
+                return;
             }
         }
 

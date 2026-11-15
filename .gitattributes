@@ -1,2 +1,5 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Modelos de más de 100 MB: se suben con Git LFS
+Guardia/Assets/Models/Guardia/*.fbx filter=lfs diff=lfs merge=lfs -text

@@ -42,6 +42,24 @@ namespace UDIT.IA3.Guardia
         [Header("Depuración")]
         public bool MostrarTraza = false;
 
+        [Header("Valores Gameplay")]
+
+        public float TiempoDescanso = 3f;
+
+        [Tooltip("Segundos que se queda parado al empezar a sospechar, antes de acercarse.")]
+        public float PausaInvestigar = 1f;
+        [Tooltip("Metros máximos que avanza hacia lo que ha visto mientras investiga.")]
+        public float AvanceInvestigar = 4f;
+
+        [Tooltip("Duración total de la búsqueda alrededor de la última posición conocida.")]
+        public float TiempoBusqueda = 12f;
+        [Tooltip("Radio del círculo de puntos que revisa alrededor de la última posición.")]
+        public float RadioBusqueda = 4f;
+        [Tooltip("Cuántos puntos revisa alrededor de la última posición.")]
+        [Range(1, 8)] public int PuntosBusqueda = 4;
+        [Tooltip("Segundos que se queda mirando en cada punto de búsqueda.")]
+        public float PausaBusqueda = 1.5f;
+
         /// <summary>La pizarra de este guardia. Es el ÚNICO punto de contacto entre capas.</summary>
         public Blackboard Pizarra { get; private set; }
 
@@ -54,6 +72,10 @@ namespace UDIT.IA3.Guardia
 
         private float _proximaDecision;
         private TipoDecisor _cerebroMontado;
+
+        Animator _animator;
+
+        public Animator Animator => _animator;
 
         private void Awake()
         {
@@ -77,6 +99,8 @@ namespace UDIT.IA3.Guardia
             GetComponents(_sensores);
 
             _locomocion = GetComponent<LocomocionNavMesh>();
+
+            _animator = GetComponent<Animator>();
 
             MontarCerebro(Cerebro);
         }
