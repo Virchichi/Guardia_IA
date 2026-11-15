@@ -61,6 +61,13 @@ namespace UDIT.IA3.Guardia
         public const string AlertaDeGrupo = "alertaDeGrupo";
 
         public const string InicioDescanso = "descansando";
-        public const string Rango = "rango";
+
+        // ── Disparo: lo PIDE la DECISIÓN (EstadoAtacar), lo HACE AtaqueDistancia ──
+
+        /// <summary>bool · la decisión quiere disparar ahora.</summary>
+        public const string QuiereDisparar = "quiereDisparar";
+
+        /// <summary>Vector3 · a dónde quiere disparar (posición del objetivo).</summary>
+        public const string ObjetivoDisparo = "objetivoDisparo";
     }
 }

@@ -1,3 +1,18 @@
+// ═══════════════════════════════════════════════════════════════════════════
+//  EstadoAtacar.cs — En ALERTA, lo ve y está a tiro: se para y dispara
+//
+//  La decisión NO dispara: solo PIDE disparar escribiendo en la pizarra
+//  (quiereDisparar + objetivoDisparo). Quien gira al guardia, gestiona el
+//  cargador y crea la bala es AtaqueDistancia, en la capa de acción. Es el
+//  mismo contrato que el movimiento: la decisión pide un destino y
+//  LocomocionNavMesh lo ejecuta.
+//
+//  Transiciones (todas leyendo la pizarra):
+//    · nivel baja de Alerta                  → Buscar (o Patrullar si no hay ultimaPos)
+//    · deja de verlo                         → Perseguir (va a la última posición)
+//    · se aleja más de Distancia + Margen    → Perseguir
+// ═══════════════════════════════════════════════════════════════════════════
+
 using UnityEngine;
 
 namespace UDIT.IA3.Guardia
@@ -8,63 +23,54 @@ namespace UDIT.IA3.Guardia
 
         internal override void Enter()
         {
-            AtaqueDistancia disparar = Agente.GetComponent<AtaqueDistancia>();
-
-            if(disparar == null )
-            {
-                //Error
-            }
-
-            //Si dispara, se queda quieto 
+            // Para disparar se queda quieto.
             Pizarra.Set(ClavesBB.TieneDestino, false);
-
+            AnimacionGuardia.Parar(Agente.Animator);
         }
+
         internal override void Execute()
         {
-            AtaqueDistancia disparar = Agente.GetComponent<AtaqueDistancia>();
-            NivelSospecha nivel = Pizarra.Get(ClavesBB.Nivel, NivelSospecha.Alerta);
-            bool enRango = Pizarra.Get(ClavesBB.Visible, true);
-        
+            NivelSospecha nivel = Pizarra.Get(ClavesBB.Nivel, NivelSospecha.Tranquilo);
+            bool visible = Pizarra.Get(ClavesBB.Visible, false);
 
-            if (nivel == NivelSospecha.Sospecha)
+            // ── 1. Se ha calmado
+            if (nivel != NivelSospecha.Alerta)
             {
-                // TODO � descomentad cuando teng�is EstadoInvestigar
-                // StateMachine.ChangeState(new EstadoInvestigar(StateMachine));
+                if (Pizarra.Get(ClavesBB.TieneUltimaPos, false))
+                    StateMachine.ChangeState(new EstadoBuscar(StateMachine));
+                else
+                    StateMachine.ChangeState(new EstadoPatrullar(StateMachine));
                 return;
             }
 
-            //Rango
-            if(!enRango)
+            // ── 2. Ya no lo ve: a perseguir hasta donde lo vio por última vez
+            if (!visible)
             {
-                if(Pizarra.Get(ClavesBB.TieneUltimaPos,false))
-                {
-                    Pizarra.Set(ClavesBB.Destino, Pizarra.Get(ClavesBB.UltimaPos, Agente.transform.position));
-                    Pizarra.Set(ClavesBB.TieneDestino, true);
-                }
+                StateMachine.ChangeState(new EstadoPerseguir(StateMachine));
+                return;
             }
 
+            // ── 3. Se ha alejado demasiado (con margen, para no alternar en el límite)
+            Vector3 objetivo = Pizarra.Get(ClavesBB.UltimaPos, Agente.transform.position);
+            float distancia = Vector3.Distance(Agente.transform.position, objetivo);
+            if (distancia > Agente.DistanciaDisparo + Agente.MargenRango)
+            {
+                StateMachine.ChangeState(new EstadoPerseguir(StateMachine));
+                return;
+            }
+
+            // ── 4. Pedir disparo: quieto, apuntando a donde lo ve
             Pizarra.Set(ClavesBB.TieneDestino, false);
-            if (disparar.balas == 0)
-            {
-                disparar.Recargar();
-            }
-
-            if (disparar.balas > 0)
-            {
-                Vector3 Objetivo = Pizarra.Get(ClavesBB.UltimaPos, Agente.transform.position);
-                disparar.Disparar(Objetivo);
-            }
-
+            Pizarra.Set(ClavesBB.ObjetivoDisparo, objetivo);
+            Pizarra.Set(ClavesBB.QuiereDisparar, true);
+            AnimacionGuardia.Parar(Agente.Animator);
         }
+
         internal override void Exit()
         {
-            // Aqu� no hay nada que limpiar. Pero el m�todo existe y est� vac�o
-            // a prop�sito: cuando en Enter() arranqu�is una animaci�n, un bark
-            // o una corrutina, Exit() es donde se apaga. Si no lo hac�is, os
-            // quedar�is con guardias diciendo ��qui�n anda ah�?� mientras
-            // persiguen. Pasa todos los a�os.
+            // Lo que se enciende en el estado se apaga al salir: si no, seguiría
+            // disparando mientras persigue o busca.
+            Pizarra.Set(ClavesBB.QuiereDisparar, false);
         }
-
     }
-
 }

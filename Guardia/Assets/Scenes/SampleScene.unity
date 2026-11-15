@@ -159,6 +159,37 @@ Transform:
   - {fileID: 916310818}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &165560228
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 165560229}
+  m_Layer: 0
+  m_Name: PuntaDisparo
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &165560229
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 165560228}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.167, y: 0, z: 0.503}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1875075996}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &252792584
 GameObject:
   m_ObjectHideFlags: 0
@@ -1810,9 +1841,44 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 5587081764873940103, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 165560229}
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8908783815359892586, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
+      insertIndex: 9
+      addedObject: {fileID: 1875075997}
   m_SourcePrefab: {fileID: 100100000, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
+--- !u!1 &1875075995 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8908783815359892586, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
+  m_PrefabInstance: {fileID: 1875075994}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1875075996 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5587081764873940103, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
+  m_PrefabInstance: {fileID: 1875075994}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1875075997
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1875075995}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed0b58a19d627f04787d8d615c940b67, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UDIT.IA3.Guardia.AtaqueDistancia
+  balas: 27
+  prefabBala: {fileID: -4561760674004908953, guid: 987d3fae4b9ecce4982ade5eae300dfb, type: 3}
+  puntoDisparo: {fileID: 165560229}
+  cadencia: 0.5
+  alturaApuntado: 1
+  timepoRecarga: 3
+  recargando: 0
 --- !u!1 &1913606302
 GameObject:
   m_ObjectHideFlags: 0

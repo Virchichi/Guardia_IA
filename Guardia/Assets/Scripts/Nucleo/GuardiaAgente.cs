@@ -60,6 +60,12 @@ namespace UDIT.IA3.Guardia
         [Tooltip("Segundos que se queda mirando en cada punto de búsqueda.")]
         public float PausaBusqueda = 1.5f;
 
+        [Tooltip("Distancia a la que se para y empieza a disparar.")]
+        public float DistanciaDisparo = 10f;
+        [Tooltip("Histéresis del rango: deja de disparar y vuelve a perseguir solo si se aleja " +
+                 "más de DistanciaDisparo + este margen. Evita que alterne en el límite.")]
+        public float MargenRango = 2f;
+
         /// <summary>La pizarra de este guardia. Es el ÚNICO punto de contacto entre capas.</summary>
         public Blackboard Pizarra { get; private set; }
 
@@ -93,6 +99,8 @@ namespace UDIT.IA3.Guardia
             Pizarra.Set(ClavesBB.Destino, transform.position);
             Pizarra.Set(ClavesBB.HaLlegado, true);
             Pizarra.Set(ClavesBB.AlertaDeGrupo, false);
+            Pizarra.Set(ClavesBB.QuiereDisparar, false);
+            Pizarra.Set(ClavesBB.ObjetivoDisparo, transform.position);
 
             // Todos los sensores que lleve el GameObject, sean los que sean.
             // Añadir oído en el apartado opcional es soltar un componente aquí.

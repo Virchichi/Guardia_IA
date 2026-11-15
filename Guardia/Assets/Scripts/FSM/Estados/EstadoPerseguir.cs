@@ -8,7 +8,10 @@
 //  Transiciones (todas leyendo la pizarra):
 //    · nivel baja de Alerta          → Buscar (o Patrullar si no hay ultimaPos)
 //    · no visible y ha llegado       → Buscar
+//    · visible y a DistanciaDisparo  → Atacar
 // ═══════════════════════════════════════════════════════════════════════════
+
+using UnityEngine;
 
 namespace UDIT.IA3.Guardia
 {
@@ -46,7 +49,18 @@ namespace UDIT.IA3.Guardia
                 return;
             }
 
-            // ── 3. Seguir persiguiendo. La locomoción solo recalcula la ruta
+            // ── 3. Lo veo y está a tiro → parar y disparar
+            if (visible)
+            {
+                Vector3 objetivo = Pizarra.Get(ClavesBB.UltimaPos, Agente.transform.position);
+                if (Vector3.Distance(Agente.transform.position, objetivo) <= Agente.DistanciaDisparo)
+                {
+                    StateMachine.ChangeState(new EstadoAtacar(StateMachine));
+                    return;
+                }
+            }
+
+            // ── 4. Seguir persiguiendo. La locomoción solo recalcula la ruta
             //       si el destino ha cambiado de verdad.
             PedirIrAUltimaPos();
             AnimacionGuardia.Andar(Agente.Animator);
