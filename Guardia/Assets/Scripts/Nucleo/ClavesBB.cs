@@ -61,5 +61,6 @@ namespace UDIT.IA3.Guardia
         public const string AlertaDeGrupo = "alertaDeGrupo";
 
         public const string InicioDescanso = "descansando";
+        public const string Rango = "rango";
     }
 }
