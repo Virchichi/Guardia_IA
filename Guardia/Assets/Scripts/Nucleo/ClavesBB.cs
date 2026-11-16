@@ -50,6 +50,12 @@ namespace UDIT.IA3.Guardia
         /// <summary>bool · ¿hay un destino pendiente?</summary>
         public const string TieneDestino = "tieneDestino";
 
+        // ── Añadida para el árbol: la escribe y la lee la DECISIÓN ─────────
+
+        /// <summary>Vector3 · punto alrededor de ultimaPos que el guardia va a revisar
+        /// durante la búsqueda. La elige ElegirPuntoDeBusqueda y la usa IrA.</summary>
+        public const string PuntoBusqueda = "puntoBusqueda";
+
         // ── Las escribe el MOVIMIENTO, las lee la DECISIÓN ─────────────────
 
         /// <summary>bool · ¿he llegado ya al destino que me pidieron?</summary>
