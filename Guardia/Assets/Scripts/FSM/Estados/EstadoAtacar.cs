@@ -25,7 +25,6 @@ namespace UDIT.IA3.Guardia
         {
             // Para disparar se queda quieto.
             Pizarra.Set(ClavesBB.TieneDestino, false);
-            AnimacionGuardia.Parar(Agente.Animator);
         }
 
         internal override void Execute()
@@ -63,7 +62,6 @@ namespace UDIT.IA3.Guardia
             Pizarra.Set(ClavesBB.TieneDestino, false);
             Pizarra.Set(ClavesBB.ObjetivoDisparo, objetivo);
             Pizarra.Set(ClavesBB.QuiereDisparar, true);
-            AnimacionGuardia.Parar(Agente.Animator);
         }
 
         internal override void Exit()

@@ -33,6 +33,9 @@ namespace UDIT.IA3.Guardia
         [Tooltip("Solo dispara si está encarado a menos de estos grados del objetivo.")]
         public float anguloMaximoDisparo = 15f;
 
+        /// <summary>Se lanza cada vez que sale una bala (lo usa AnimadorGuardia).</summary>
+        public event System.Action AlDisparar;
+
         private GuardiaAgente _agente;
         private float _proximoDisparo;
         private float _terminarRecarga;
@@ -104,6 +107,7 @@ namespace UDIT.IA3.Guardia
             Bala bala = Instantiate(prefabBala, origen, Quaternion.LookRotation(direccion));
             bala.Lanzar(direccion, transform);
 
+            AlDisparar?.Invoke();
             balas--;
             _proximoDisparo = Time.time + cadencia;
             return true;

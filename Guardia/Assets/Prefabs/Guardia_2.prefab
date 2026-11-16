@@ -51,15 +51,7 @@ Animator:
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
   m_AnimatePhysics: 0
-  m_WarningMessage: "\nBinding warning: Some generic clip(s) animate transforms that
-    are already bound by a Humanoid avatar. These transforms can only be changed
-    by Humanoid clips.\n\tTransform 'mixamorig:Hips'\n\tTransform 'mixamorig:LeftFoot'\n\tTransform
-    'mixamorig:LeftHandThumb2'\n\tTransform 'mixamorig:LeftHandIndex1'\n\tTransform
-    'mixamorig:LeftHandPinky2'\n\tTransform 'mixamorig:RightHandRing2'\n\tTransform
-    'mixamorig:Spine1'\n\tTransform 'mixamorig:LeftToeBase'\n\tTransform 'mixamorig:LeftHandThumb3'\n\tTransform
-    'mixamorig:RightArm'\n\tand more ...\n\tFrom animation clip 'mixamo.com'\n\tFrom
-    animation clip 'mixamo.com'\n\tFrom animation clip 'mixamo.com'\n\tFrom animation
-    clip 'mixamo.com'"
+  m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
@@ -151,7 +143,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 430516164233356632}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.2772263, y: -0.006890863, z: 0.048450984, w: -0.9595575}
+  m_LocalRotation: {x: -0.27722633, y: -0.0068908636, z: 0.048450988, w: -0.95955753}
   m_LocalPosition: {x: 0.030382372, y: 0.09039023, z: -0.0017473958}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -952,7 +944,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4046878943384417175}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.3131137, y: -0.000057175756, z: 0.013480544, w: 0.94961995}
+  m_LocalRotation: {x: 0.31311372, y: -0.00005717576, z: 0.013480545, w: 0.94962}
   m_LocalPosition: {x: 0.00007515184, y: 0.027489098, z: -0.000000009895302}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -1206,7 +1198,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5342429915967584756}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.0016155507, y: -0.035199605, z: 0.046206713, w: 0.9983102}
+  m_LocalRotation: {x: 0.0016155508, y: -0.035199605, z: 0.046206716, w: 0.9983102}
   m_LocalPosition: {x: 0.00000001839362, y: 0.24810036, z: 0.000000020489097}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -1975,7 +1967,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7062690079683120164}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.27883753, y: -0.008189052, z: 0.010740235, w: -0.9602433}
+  m_LocalRotation: {x: -0.27883756, y: -0.008189053, z: 0.010740236, w: -0.96024334}
   m_LocalPosition: {x: 0.013237286, y: 0.12402051, z: 0.0008643437}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -2318,6 +2310,8 @@ GameObject:
   - component: {fileID: 3792812087582554436}
   - component: {fileID: 8176130405563914641}
   - component: {fileID: 5646365273808456603}
+  - component: {fileID: 569060955093702888}
+  - component: {fileID: 4969351286265505695}
   m_Layer: 0
   m_Name: Guardia_2
   m_TagString: Untagged
@@ -2461,11 +2455,23 @@ MonoBehaviour:
   CapasQueOcluyen:
     serializedVersion: 2
     m_Bits: 8
+  AlturaCabeza: 1.6
+  AlturaTorso: 0.9
+  AlturaPies: 0.1
   VelocidadSubida: 0.8
   VelocidadBajada: 0.08
   UmbralSospecha: 0.35
   UmbralAlerta: 0.8
   Histeresis: 0.1
+  DistanciaCercana: 2
+  VelocidadMuyLlamativa: 5
+  MinimoDistancia: 0.2
+  MinimoAngulo: 0.3
+  MinimoMovimiento: 0.4
+  TiempoGracia: 0.25
+  RetardoOlvido: 1.5
+  Nervio: 0.25
+  MaxPerdidasNervio: 3
 --- !u!114 &2376116234265865937
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2495,6 +2501,14 @@ MonoBehaviour:
   FrecuenciaDecision: 10
   MostrarTraza: 0
   TiempoDescanso: 0
+  PausaInvestigar: 1
+  AvanceInvestigar: 4
+  TiempoBusqueda: 12
+  RadioBusqueda: 4
+  PuntosBusqueda: 4
+  PausaBusqueda: 1.5
+  DistanciaDisparo: 10
+  MargenRango: 2
 --- !u!114 &8176130405563914641
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2520,26 +2534,47 @@ Animator:
   m_GameObject: {fileID: 8908783815359892586}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: 5de0b6e390987d74c900cbd4c120819b, type: 3}
-  m_Controller: {fileID: 9100000, guid: e94626a2ef873164eb135bc07db8346c, type: 2}
+  m_Controller: {fileID: 9100000, guid: 01959095f2c9fbf44afff8447fa81df1, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
-  m_ApplyRootMotion: 1
+  m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
   m_AnimatePhysics: 0
-  m_WarningMessage: "\nBinding warning: Some generic clip(s) animate transforms that
-    are already bound by a Humanoid avatar. These transforms can only be changed
-    by Humanoid clips.\n\tTransform 'mixamorig:Hips'\n\tTransform 'mixamorig:LeftFoot'\n\tTransform
-    'mixamorig:LeftHandThumb2'\n\tTransform 'mixamorig:LeftHandIndex1'\n\tTransform
-    'mixamorig:LeftHandPinky2'\n\tTransform 'mixamorig:RightHandRing2'\n\tTransform
-    'mixamorig:Spine1'\n\tTransform 'mixamorig:LeftToeBase'\n\tTransform 'mixamorig:LeftHandThumb3'\n\tTransform
-    'mixamorig:RightArm'\n\tand more ...\n\tFrom animation clip 'mixamo.com'\n\tFrom
-    animation clip 'mixamo.com'\n\tFrom animation clip 'mixamo.com'\n\tFrom animation
-    clip 'mixamo.com'"
+  m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &569060955093702888
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8908783815359892586}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 606c00ad4413d094c8282f039a44bf55, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UDIT.IA3.Guardia.AnimadorGuardia
+  UmbralQuieto: 0.1
+  SuavizadoVelocidad: 10
+  VelocidadCapaArma: 6
+--- !u!114 &4969351286265505695
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8908783815359892586}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3f4c4b07bd00bd458d09ecb0713dbf1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UDIT.IA3.Guardia.RitmoGuardia
+  VelocidadAndar: 1.6
+  VelocidadCorrer: 4
 --- !u!1 &8949073845540588318
 GameObject:
   m_ObjectHideFlags: 0

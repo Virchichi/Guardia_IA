@@ -8,7 +8,6 @@ namespace UDIT.IA3.Guardia
 
         internal override void Enter()
         {
-            AnimacionGuardia.Parar(Agente.Animator);
 
             Pizarra.Set(ClavesBB.TieneDestino, false);
             Pizarra.Set(ClavesBB.InicioDescanso, Pizarra.Tiempo);

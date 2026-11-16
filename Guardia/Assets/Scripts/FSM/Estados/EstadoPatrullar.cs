@@ -43,7 +43,6 @@ namespace UDIT.IA3.Guardia
                     "Mirad los apartados 3.4 y 3.5 del README_Montaje.", Agente);
             }
 
-            Agente.Animator.CrossFade("Walk", 0.1f);
         }
 
         internal override void Execute()

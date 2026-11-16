@@ -25,7 +25,6 @@ namespace UDIT.IA3.Guardia
             // reseteamos para que el primer Execute no crea que ya ha llegado.
             Pizarra.Set(ClavesBB.HaLlegado, false);
             PedirIrAUltimaPos();
-            AnimacionGuardia.Andar(Agente.Animator);
         }
 
         internal override void Execute()
@@ -63,7 +62,6 @@ namespace UDIT.IA3.Guardia
             // ── 4. Seguir persiguiendo. La locomoción solo recalcula la ruta
             //       si el destino ha cambiado de verdad.
             PedirIrAUltimaPos();
-            AnimacionGuardia.Andar(Agente.Animator);
         }
 
         internal override void Exit() { }

@@ -64,7 +64,6 @@ namespace UDIT.IA3.Guardia
             // ── 3. Ir de punto en punto, parándose a mirar en cada uno ──────
             if (!Pizarra.Get(ClavesBB.HaLlegado, false))
             {
-                AnimacionGuardia.Andar(Agente.Animator);
                 return;
             }
 
@@ -73,7 +72,6 @@ namespace UDIT.IA3.Guardia
             {
                 _llegadaEn = Pizarra.Tiempo;
                 Pizarra.Set(ClavesBB.TieneDestino, false);
-                AnimacionGuardia.Parar(Agente.Animator);
                 return;
             }
 
@@ -100,7 +98,6 @@ namespace UDIT.IA3.Guardia
             Pizarra.Set(ClavesBB.TieneDestino, true);
             Pizarra.Set(ClavesBB.HaLlegado, false);
             _llegadaEn = -1f;
-            AnimacionGuardia.Andar(Agente.Animator);
         }
 
         /// <summary>No lo ha encontrado: caduca la última posición y vuelve a patrullar.</summary>

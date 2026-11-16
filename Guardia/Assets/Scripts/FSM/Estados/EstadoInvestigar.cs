@@ -30,7 +30,6 @@ namespace UDIT.IA3.Guardia
 
             // Primero se para en seco.
             Pizarra.Set(ClavesBB.TieneDestino, false);
-            AnimacionGuardia.Parar(Agente.Animator);
         }
 
         internal override void Execute()
@@ -79,10 +78,6 @@ namespace UDIT.IA3.Guardia
                 _haPedidoDestino = true;
                 _vistoAlPedir = visto;
             }
-
-            // ── 4. Animación según si se mueve o ya ha llegado
-            if (Pizarra.Get(ClavesBB.HaLlegado, false)) AnimacionGuardia.Parar(Agente.Animator);
-            else                                       AnimacionGuardia.Andar(Agente.Animator);
         }
 
         internal override void Exit() { }
