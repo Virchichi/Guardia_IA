@@ -50,6 +50,8 @@ public class Bala : MonoBehaviour
         if (otro.CompareTag("Player"))
         {
             Debug.Log("[Bala] Impacto en el jugador: " + otro.name, otro);
+            var vida = otro.GetComponentInParent<UDIT.IA3.Jugador.VidaJugador>();
+            if (vida != null) vida.RecibirImpacto();
         }
 
         Destroy(gameObject);

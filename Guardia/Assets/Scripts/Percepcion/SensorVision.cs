@@ -142,6 +142,9 @@ namespace UDIT.IA3.Guardia
         private Vector3 _posObjetivoPrevia;
         private float _velocidadObjetivo;
 
+        // Si el objetivo nos cuenta su postura (agachado, altura real), la usamos.
+        private IObjetivoSigilo _objetivoSigilo;
+
         // Resultado de la última comprobación (los usa el medidor)
         private float _distancia;
         private float _angulo;
@@ -158,6 +161,7 @@ namespace UDIT.IA3.Guardia
         public float FactorAngulo { get; private set; }
         public float FactorVisibilidad { get; private set; }
         public float FactorMovimiento { get; private set; }
+        public float FactorPostura { get; private set; }
 
         private void Awake()
         {
@@ -169,7 +173,11 @@ namespace UDIT.IA3.Guardia
                 if (go != null) Objetivo = go.transform;
             }
 
-            if (Objetivo != null) _posObjetivoPrevia = Objetivo.position;
+            if (Objetivo != null)
+            {
+                _posObjetivoPrevia = Objetivo.position;
+                _objetivoSigilo = Objetivo.GetComponentInParent<IObjetivoSigilo>();
+            }
         }
 
         // ───────────────────────────────────────────────────────────────────
@@ -270,9 +278,20 @@ namespace UDIT.IA3.Guardia
             //
             // Physics.Raycast devuelve TRUE si ha chocado, es decir, si NO se ve.
             // Ignoramos triggers: un volumen invisible no tapa la vista.
+            //
+            // Si el objetivo es un IObjetivoSigilo, la cabeza y el torso se
+            // calculan con su altura REAL: agachado detrás de una caja baja, el
+            // rayo a la «cabeza de pie» pasaría por encima y lo vería.
+            float cabeza = AlturaCabeza, torso = AlturaTorso;
+            if (_objetivoSigilo != null)
+            {
+                cabeza = _objetivoSigilo.AlturaVisible * 0.92f;
+                torso  = _objetivoSigilo.AlturaVisible * 0.55f;
+            }
+
             Vector3 pivote = Objetivo.position;
-            if (RayoLlega(pivote + Vector3.up * AlturaCabeza)) _rayosQueLlegan++;
-            if (RayoLlega(pivote + Vector3.up * AlturaTorso))  _rayosQueLlegan++;
+            if (RayoLlega(pivote + Vector3.up * cabeza)) _rayosQueLlegan++;
+            if (RayoLlega(pivote + Vector3.up * torso))  _rayosQueLlegan++;
             if (RayoLlega(pivote + Vector3.up * AlturaPies))   _rayosQueLlegan++;
 
             return _rayosQueLlegan > 0;
@@ -340,7 +359,11 @@ namespace UDIT.IA3.Guardia
                 FactorMovimiento = Mathf.Lerp(MinimoMovimiento, 1f,
                     Mathf.InverseLerp(0f, VelocidadMuyLlamativa, _velocidadObjetivo));
 
-                EvidenciaActual = FactorDistancia * FactorAngulo * FactorVisibilidad * FactorMovimiento;
+                // · Postura: agachado se nota menos (si el objetivo lo informa).
+                FactorPostura = _objetivoSigilo != null ? _objetivoSigilo.FactorPostura : 1f;
+
+                EvidenciaActual = FactorDistancia * FactorAngulo * FactorVisibilidad *
+                                  FactorMovimiento * FactorPostura;
 
                 // ── 2) SUBIR: progresivo, nunca a saltos ────────────────────
                 _sospecha += EvidenciaActual * VelocidadSubida * dt;
