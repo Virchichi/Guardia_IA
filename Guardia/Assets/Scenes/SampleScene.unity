@@ -1783,6 +1783,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 818189802}
     - target: {fileID: 3792812087582554436, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
+      propertyPath: Cerebro
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3792812087582554436, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
       propertyPath: TiempoDescanso
       value: 5
       objectReference: {fileID: 0}

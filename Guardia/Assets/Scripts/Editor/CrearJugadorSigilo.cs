@@ -222,7 +222,7 @@ namespace UDIT.IA3.Guardia.Herramientas
             if (jugador.GetComponent<VidaJugador>() == null)     Undo.AddComponent<VidaJugador>(jugador);
 
             var js = jugador.GetComponent<JugadorSigilo>();
-            if (js.Camara == null) js.Camara = Object.FindFirstObjectByType<CameraController>();
+            if (js.Camara == null) js.Camara = Object.FindAnyObjectByType<CameraController>();
 
             Animator anim = jugador.GetComponent<Animator>();
             if (anim == null) anim = jugador.GetComponentInChildren<Animator>();

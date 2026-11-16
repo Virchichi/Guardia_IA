@@ -94,7 +94,7 @@ namespace UDIT.IA3.Jugador
             _desfaseCentro = _cc.center.y - _cc.height * 0.5f;
             _yawPrevio = transform.eulerAngles.y;
 
-            if (Camara == null) Camara = FindFirstObjectByType<CameraController>();
+            if (Camara == null) Camara = FindAnyObjectByType<CameraController>();
         }
 
         void OnEnable()
