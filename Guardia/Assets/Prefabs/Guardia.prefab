@@ -9,7 +9,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1521671624725168806}
-  - component: {fileID: 1343671571006357532}
   m_Layer: 0
   m_Name: Ch15_nonPBR
   m_TagString: Untagged
@@ -26,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 65373401636675427}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.0000018179417, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -1.087, z: 0}
+  m_LocalPosition: {x: 0, y: -1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -34,28 +33,6 @@ Transform:
   - {fileID: 3971990160857448340}
   m_Father: {fileID: 5587081764873940103}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!95 &1343671571006357532
-Animator:
-  serializedVersion: 7
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 65373401636675427}
-  m_Enabled: 1
-  m_Avatar: {fileID: 9000000, guid: 5de0b6e390987d74c900cbd4c120819b, type: 3}
-  m_Controller: {fileID: 9100000, guid: e94626a2ef873164eb135bc07db8346c, type: 2}
-  m_CullingMode: 1
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 1
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_AnimatePhysics: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &83265814625866839
 GameObject:
   m_ObjectHideFlags: 0
@@ -2102,6 +2079,37 @@ Transform:
   - {fileID: 5460982737520433467}
   m_Father: {fileID: 7918392704703268580}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &7705375538927198503
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4899923033613140272}
+  m_Layer: 0
+  m_Name: PuntaDisparo
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4899923033613140272
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7705375538927198503}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.167, y: 0, z: 0.503}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5587081764873940103}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8211136139049324935
 GameObject:
   m_ObjectHideFlags: 0
@@ -2309,11 +2317,12 @@ GameObject:
   - component: {fileID: 2376116234265865937}
   - component: {fileID: 3792812087582554436}
   - component: {fileID: 8176130405563914641}
+  - component: {fileID: 4889429525727953635}
   - component: {fileID: 5646365273808456603}
   - component: {fileID: 569060955093702888}
   - component: {fileID: 4969351286265505695}
   m_Layer: 0
-  m_Name: Guardia_2
+  m_Name: Guardia
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2334,6 +2343,7 @@ Transform:
   m_Children:
   - {fileID: 8415529584472244736}
   - {fileID: 1521671624725168806}
+  - {fileID: 4899923033613140272}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 40.398, z: 0}
 --- !u!33 &2290624472484349085
@@ -2403,7 +2413,7 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.5
-  m_Speed: 3.5
+  m_Speed: 0.75
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 240
@@ -2500,7 +2510,7 @@ MonoBehaviour:
   Cerebro: 0
   FrecuenciaDecision: 10
   MostrarTraza: 0
-  TiempoDescanso: 0
+  TiempoDescanso: 5
   PausaInvestigar: 1
   AvanceInvestigar: 4
   TiempoBusqueda: 12
@@ -2524,6 +2534,28 @@ MonoBehaviour:
   DibujarCono: 1
   DibujarSospecha: 1
   DibujarUltimaPos: 1
+--- !u!114 &4889429525727953635
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8908783815359892586}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed0b58a19d627f04787d8d615c940b67, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UDIT.IA3.Guardia.AtaqueDistancia
+  balasCargador: 15
+  balas: 27
+  timepoRecarga: 3
+  recargando: 0
+  prefabBala: {fileID: -4561760674004908953, guid: 987d3fae4b9ecce4982ade5eae300dfb, type: 3}
+  puntoDisparo: {fileID: 4899923033613140272}
+  cadencia: 0.5
+  alturaApuntado: 1
+  velocidadGiro: 360
+  anguloMaximoDisparo: 15
 --- !u!95 &5646365273808456603
 Animator:
   serializedVersion: 7
@@ -2574,7 +2606,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UDIT.IA3.Guardia.RitmoGuardia
   VelocidadAndar: 1.6
+  AceleracionAndar: 8
+  GiroAndar: 240
   VelocidadCorrer: 4
+  AceleracionCorrer: 20
+  GiroCorrer: 540
 --- !u!1 &8949073845540588318
 GameObject:
   m_ObjectHideFlags: 0

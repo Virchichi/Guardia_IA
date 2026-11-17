@@ -159,37 +159,6 @@ Transform:
   - {fileID: 916310818}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &165560228
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 165560229}
-  m_Layer: 0
-  m_Name: PuntaDisparo
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &165560229
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 165560228}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.167, y: 0, z: 0.503}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1875075996}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &252792584
 GameObject:
   m_ObjectHideFlags: 0
@@ -1400,14 +1369,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1227481327427643834, guid: 91843a70b87c31c48847ca51628d6cf8, type: 3}
-      propertyPath: m_Controller
-      value: 
-      objectReference: {fileID: 9100000, guid: 03f648f3bc92cc44ea0b7ec8e699130a, type: 2}
-    - target: {fileID: 1227481327427643834, guid: 91843a70b87c31c48847ca51628d6cf8, type: 3}
-      propertyPath: m_ApplyRootMotion
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 2238211157547969393, guid: 91843a70b87c31c48847ca51628d6cf8, type: 3}
       propertyPath: m_LocalPosition.x
       value: -6.368465
@@ -1452,91 +1413,20 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
-    - target: {fileID: 3844588178762948479, guid: 91843a70b87c31c48847ca51628d6cf8, type: 3}
-      propertyPath: m_TagString
-      value: Player
-      objectReference: {fileID: 0}
+    - target: {fileID: 5397034248174699054, guid: 91843a70b87c31c48847ca51628d6cf8, type: 3}
+      propertyPath: Camara
+      value: 
+      objectReference: {fileID: 330585548}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 3844588178762948479, guid: 91843a70b87c31c48847ca51628d6cf8, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1290113787}
-    - targetCorrespondingSourceObject: {fileID: 3844588178762948479, guid: 91843a70b87c31c48847ca51628d6cf8, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1290113786}
-    - targetCorrespondingSourceObject: {fileID: 3844588178762948479, guid: 91843a70b87c31c48847ca51628d6cf8, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1290113785}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 91843a70b87c31c48847ca51628d6cf8, type: 3}
---- !u!1 &1290113783 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3844588178762948479, guid: 91843a70b87c31c48847ca51628d6cf8, type: 3}
-  m_PrefabInstance: {fileID: 1290113782}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1290113784 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2238211157547969393, guid: 91843a70b87c31c48847ca51628d6cf8, type: 3}
   m_PrefabInstance: {fileID: 1290113782}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1290113785
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1290113783}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9d69fe40cacfff348a459e34c4258593, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UDIT.IA3.Jugador.VidaJugador
-  VidaMaxima: 3
-  TiempoReaparicion: 3
-  Invulnerabilidad: 0.6
-  MostrarEnPantalla: 1
---- !u!114 &1290113786
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1290113783}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 953a0b9f7a129b8458ea643ec23a2ba8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UDIT.IA3.Jugador.AnimadorJugador
-  SuavizadoVelocidad: 0.1
-  GiroMaximo: 200
-  UmbralTransicion: 0.3
---- !u!114 &1290113787
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1290113783}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cb17c89894fe7cc4c9f287a8e9eebaeb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UDIT.IA3.Jugador.JugadorSigilo
-  VelocidadAgachado: 1.3
-  VelocidadSigilo: 1.6
-  VelocidadCorrer: 4.8
-  Aceleracion: 12
-  VelocidadGiro: 600
-  AnguloGiroEnSitio: 70
-  VelocidadGiroEnSitio: 300
-  UmbralParado: 0.6
-  AlturaAgachado: 1.1
-  VelocidadCambioAltura: 5
-  FactorPosturaAgachado: 0.55
-  MantenerParaAgacharse: 0
-  Gravedad: -20
-  Camara: {fileID: 330585548}
 --- !u!1 &1396990825
 GameObject:
   m_ObjectHideFlags: 0
@@ -1750,14 +1640,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1190292552527061412, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
-      propertyPath: m_Speed
-      value: 0.75
-      objectReference: {fileID: 0}
-    - target: {fileID: 1343671571006357532, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
-      propertyPath: m_WarningMessage
-      value: 
-      objectReference: {fileID: 0}
     - target: {fileID: 2031718361710799158, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
       propertyPath: Objetivo
       value: 
@@ -1782,14 +1664,6 @@ PrefabInstance:
       propertyPath: 'Puntos.Array.data[4]'
       value: 
       objectReference: {fileID: 818189802}
-    - target: {fileID: 3792812087582554436, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
-      propertyPath: Cerebro
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3792812087582554436, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
-      propertyPath: TiempoDescanso
-      value: 5
-      objectReference: {fileID: 0}
     - target: {fileID: 5587081764873940103, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
       propertyPath: m_LocalPosition.x
       value: 3.5980263
@@ -1830,57 +1704,15 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5646365273808456603, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
-      propertyPath: m_WarningMessage
-      value: 
-      objectReference: {fileID: 0}
     - target: {fileID: 8908783815359892586, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
       propertyPath: m_Name
-      value: Guardia_2 (1)
+      value: Guardia
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects:
-    - targetCorrespondingSourceObject: {fileID: 5587081764873940103, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 165560229}
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 8908783815359892586, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
-      insertIndex: 9
-      addedObject: {fileID: 1875075997}
+    m_AddedGameObjects: []
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
---- !u!1 &1875075995 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8908783815359892586, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
-  m_PrefabInstance: {fileID: 1875075994}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &1875075996 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 5587081764873940103, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
-  m_PrefabInstance: {fileID: 1875075994}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1875075997
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1875075995}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ed0b58a19d627f04787d8d615c940b67, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UDIT.IA3.Guardia.AtaqueDistancia
-  balasCargador: 15
-  balas: 27
-  timepoRecarga: 3
-  recargando: 0
-  prefabBala: {fileID: -4561760674004908953, guid: 987d3fae4b9ecce4982ade5eae300dfb, type: 3}
-  puntoDisparo: {fileID: 165560229}
-  cadencia: 0.5
-  alturaApuntado: 1
-  velocidadGiro: 360
-  anguloMaximoDisparo: 15
 --- !u!1 &1913606302
 GameObject:
   m_ObjectHideFlags: 0

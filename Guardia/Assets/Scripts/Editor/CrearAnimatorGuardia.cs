@@ -30,7 +30,8 @@ namespace UDIT.IA3.Guardia.Herramientas
         const string Modelo        = "Assets/Models/Guardia/Ch15_nonPBR.fbx";
         const string RutaAnimator  = "Assets/Game/Animator/Guardia_Animator.controller";
         const string RutaMascara   = "Assets/Game/Animator/Guardia_TroncoBrazos.mask";
-        const string RutaPrefab    = "Assets/Prefabs/Guardia_2.prefab";
+        // Se prueba en este orden (el prefab se ha llamado de las dos formas).
+        static readonly string[] RutasPrefab = { "Assets/Prefabs/Guardia.prefab", "Assets/Prefabs/Guardia_2.prefab" };
 
         // Deben coincidir con RitmoGuardia (VelocidadAndar / VelocidadCorrer).
         const float VelAndar  = 1.6f;
@@ -133,6 +134,7 @@ namespace UDIT.IA3.Guardia.Herramientas
                 arbol.children = hijos;
             }
             sm.defaultState = loco;
+            loco.iKOnFeet = true;   // ajusta los pies al suelo en la mezcla andar/correr
 
             if (look != null)
             {
@@ -260,6 +262,18 @@ namespace UDIT.IA3.Guardia.Herramientas
             c.lockRootRotation = true;      // Bake Into Pose
             c.lockRootHeightY = true;
             c.lockRootPositionXZ = true;
+
+            // Based Upon: Original en la rotación → no se balancea siguiendo el
+            // torso (con «Body Orientation» el cuerpo entero oscila al correr).
+            c.keepOriginalOrientation = true;
+            // Based Upon: Feet en la altura → los pies quedan a ras del suelo
+            // (con «Original» la cadera baja al correr y los pies lo atraviesan).
+            c.keepOriginalPositionY = false;
+            c.heightFromFeet = true;
+            // Based Upon: Center of Mass en XZ → el cuerpo queda centrado bajo el
+            // guardia. Con «Original», clips como «Rifle Run» desplazan el rig hacia
+            // un lado (el origen del clip no está bajo el cuerpo).
+            c.keepOriginalPositionXZ = false;
             imp.clipAnimations = new[] { c };
 
             imp.SaveAndReimport();
@@ -267,32 +281,68 @@ namespace UDIT.IA3.Guardia.Herramientas
 
         static void AsignarAlPrefab(AnimatorController ctrl)
         {
-            if (!File.Exists(RutaPrefab))
+            string ruta = RutasPrefab.FirstOrDefault(File.Exists);
+            if (ruta == null)
             {
-                Debug.LogWarning("[Animator Guardia] No encuentro " + RutaPrefab +
-                                 ". Asignad Guardia_Animator al Animator del guardia a mano.");
+                Debug.LogWarning("[Animator Guardia] No encuentro el prefab del guardia en Assets/Prefabs/. " +
+                                 "Asignad Guardia_Animator al Animator del guardia a mano.");
                 return;
             }
 
-            GameObject raiz = PrefabUtility.LoadPrefabContents(RutaPrefab);
+            GameObject raiz = PrefabUtility.LoadPrefabContents(ruta);
             try
             {
-                Animator anim = raiz.GetComponentInChildren<Animator>();
+                GuardiaAgente agente = raiz.GetComponentInChildren<GuardiaAgente>();
+                GameObject go = agente != null ? agente.gameObject : raiz;
+
+                // UN SOLO Animator, en el objeto del guardia. Si hay más en los
+                // hijos (el modelo de Mixamo trae el suyo), se pelean por el
+                // mismo esqueleto: balanceo, pies hundidos, poses mezcladas.
+                Animator anim = go.GetComponent<Animator>();
+                Animator[] todos = raiz.GetComponentsInChildren<Animator>(true);
+                if (anim == null && todos.Length > 0) anim = todos[0];
+
+                foreach (Animator otro in todos)
+                {
+                    if (otro == anim) continue;
+                    if (anim != null && anim.avatar == null) anim.avatar = otro.avatar;
+                    Debug.Log("[Animator Guardia] Quitado un Animator duplicado en «" + otro.gameObject.name + "».");
+                    Object.DestroyImmediate(otro, true);
+                }
+
                 if (anim != null)
                 {
                     anim.runtimeAnimatorController = ctrl;
                     anim.applyRootMotion = false;
+                    anim.cullingMode = AnimatorCullingMode.AlwaysAnimate;
                 }
 
-                GuardiaAgente agente = raiz.GetComponentInChildren<GuardiaAgente>();
-                if (agente != null)
+                // Pies a ras del suelo: el NavMeshAgent sube el objeto «BaseOffset»
+                // metros sobre el NavMesh, así que el modelo (pivote en los pies,
+                // como los de Mixamo) tiene que estar exactamente a −BaseOffset.
+                var nav = go.GetComponent<UnityEngine.AI.NavMeshAgent>();
+                if (anim != null && nav != null)
                 {
-                    GameObject go = agente.gameObject;
-                    if (go.GetComponent<AnimadorGuardia>() == null) go.AddComponent<AnimadorGuardia>();
-                    if (go.GetComponent<RitmoGuardia>() == null)    go.AddComponent<RitmoGuardia>();
+                    Transform modelo = null;
+                    foreach (Transform hijo in go.transform)
+                        if (hijo.GetComponentInChildren<SkinnedMeshRenderer>(true) != null) { modelo = hijo; break; }
+                    if (modelo != null)
+                    {
+                        Vector3 p = modelo.localPosition;
+                        if (Mathf.Abs(p.y + nav.baseOffset) > 0.001f)
+                        {
+                            Debug.Log("[Animator Guardia] Modelo «" + modelo.name + "» de Y=" + p.y + " a Y=" + (-nav.baseOffset) +
+                                      " para que los pies queden sobre el suelo.");
+                            modelo.localPosition = new Vector3(p.x, -nav.baseOffset, p.z);
+                        }
+                    }
                 }
 
-                PrefabUtility.SaveAsPrefabAsset(raiz, RutaPrefab);
+                if (go.GetComponent<AnimadorGuardia>() == null) go.AddComponent<AnimadorGuardia>();
+                if (go.GetComponent<RitmoGuardia>() == null)    go.AddComponent<RitmoGuardia>();
+
+                PrefabUtility.SaveAsPrefabAsset(raiz, ruta);
+                Debug.Log("[Animator Guardia] Prefab actualizado: " + ruta);
             }
             finally
             {
