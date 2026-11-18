@@ -1,26 +1,22 @@
 // ═══════════════════════════════════════════════════════════════════════════
-//  NodoMovimiento.cs — Base común de los nodos hoja que piden un destino
+//  NodoMovimiento.cs — Base común de los nodos hoja que PIDEN un destino
 //
-//  Todos los nodos que mueven al guardia hacen lo mismo: escribir «quiero ir
-//  a X» en la pizarra (Destino + TieneDestino) y, a veces, preguntar si ya han
-//  llegado (HaLlegado, que escribe LocomocionNavMesh). Esta clase reúne esa
-//  lógica para no repetirla en cada nodo.
+//  Regla 2 del enunciado: «la decisión no mueve». Estos nodos solo escriben
+//  en la pizarra «quiero ir a X» (Destino + TieneDestino). Quien llama a
+//  NavMeshAgent.SetDestination es LocomocionNavMesh, y nadie más.
 //
-//  ¿Por qué hace falta? Por un detalle de tiempos:
+//  Sigue el patrón del IrA de los apuntes (B3.3a, diapositiva 6):
 //
-//    1. El nodo escribe un destino NUEVO en la pizarra.
-//    2. En ese mismo frame, la locomoción llama a SetDestination, pero el
-//       valor de HaLlegado que hay en la pizarra todavía se calculó para el
-//       destino ANTERIOR.
-//    3. Si el nodo mirase HaLlegado en el siguiente tick sin más, podría creer
-//       que ya ha llegado a un sitio al que ni siquiera ha empezado a ir.
+//    · Al pedir un destino se pone HaLlegado = false. Si no, en el primer
+//      tick seguiría valiendo la llegada del destino ANTERIOR y la acción
+//      terminaría en el acto, sin haberse movido.
 //
-//  Solución: cuando pedimos un destino distinto, ignoramos HaLlegado durante
-//  un tick, para dar tiempo a que la locomoción responda.
+//    · OnTerminate(Aborted) RETIRA la petición (TieneDestino = false). Si el
+//      Monitor o el ActiveSelector cortan la acción y no la retiramos, el
+//      guardia sigue andando hacia el destino viejo.
 //
-//  Ojo: _esperandoRespuesta NO es «en qué estado estoy» (eso sería una FSM
-//  disfrazada). Es solo un detalle técnico de sincronización con la capa de
-//  movimiento, y se reinicia cada vez que el nodo empieza.
+//  Todos los nodos que mueven heredan de aquí: IrA, Seguir y
+//  AcercarseConCautela. Así esas dos reglas se escriben una sola vez.
 // ═══════════════════════════════════════════════════════════════════════════
 
 using UnityEngine;
@@ -30,57 +26,24 @@ namespace UDIT.IA3.Guardia
 {
     public abstract class NodoMovimiento : Node
     {
-        /// <summary>Distancia mínima para considerar que el destino ha cambiado.
-        /// Es la misma que usa LocomocionNavMesh para decidir si recalcula ruta.</summary>
-        private const float CambioMinimoCuadrado = 0.01f;
-
-        private bool _esperandoRespuesta;
-
         protected NodoMovimiento(string nombre) : base(nombre) { }
 
-        protected override void OnInitialize(Blackboard bb)
+        /// <summary>Escribe en la pizarra «quiero ir a destino». NO mueve.</summary>
+        protected static void PedirDestino(Blackboard bb, Vector3 destino)
         {
-            _esperandoRespuesta = false;
+            bb.Set(ClavesBB.Destino, destino);
+            bb.Set(ClavesBB.TieneDestino, true);
+            bb.Set(ClavesBB.HaLlegado, false);
         }
 
         /// <summary>
-        /// Escribe en la pizarra «quiero ir a destino». NO mueve: quien mueve es
-        /// LocomocionNavMesh, que lee esta clave en la fase Actuar.
+        /// Si nos cortan a mitad de camino, retiramos la petición. Las clases
+        /// hijas que sobrescriban OnTerminate deben llamar a base.OnTerminate.
         /// </summary>
-        protected void PedirDestino(Blackboard bb, Vector3 destino)
+        protected override void OnTerminate(Blackboard bb, Status resultado)
         {
-            bool yaTeniaDestino = bb.Get(ClavesBB.TieneDestino, false);
-            Vector3 anterior = bb.Get(ClavesBB.Destino, destino);
-
-            bool esNuevo = !yaTeniaDestino ||
-                           (anterior - destino).sqrMagnitude > CambioMinimoCuadrado;
-
-            if (esNuevo)
-            {
-                bb.Set(ClavesBB.Destino, destino);
-                bb.Set(ClavesBB.TieneDestino, true);
-                _esperandoRespuesta = true;
-            }
-        }
-
-        /// <summary>Pide a la locomoción que se quede quieto.</summary>
-        protected void Detenerse(Blackboard bb)
-        {
-            bb.Set(ClavesBB.TieneDestino, false);
-        }
-
-        /// <summary>
-        /// ¿Ha llegado al último destino que pidió ESTE nodo? Si acaba de pedir
-        /// uno nuevo, responde «no» durante un tick (ver cabecera del fichero).
-        /// </summary>
-        protected bool HaLlegado(Blackboard bb)
-        {
-            if (_esperandoRespuesta)
-            {
-                _esperandoRespuesta = false;
-                return false;
-            }
-            return bb.Get(ClavesBB.HaLlegado, false);
+            if (resultado == Status.Aborted)
+                bb.Set(ClavesBB.TieneDestino, false);
         }
     }
 }

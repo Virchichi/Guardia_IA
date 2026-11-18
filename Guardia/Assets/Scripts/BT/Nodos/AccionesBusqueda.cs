@@ -1,21 +1,27 @@
 // ═══════════════════════════════════════════════════════════════════════════
-//  AccionesBusqueda.cs — Nodos hoja pequeños que forman la rama de búsqueda
+//  AccionesBusqueda.cs — Nodos hoja de la rama de búsqueda
 //
-//  La búsqueda NO es un nodo gigante: se monta en DecisorBT combinando piezas
-//  pequeñas con una Sequence y un Repeat:
+//  Equivale a EstadoBuscar de la FSM: ir a la última posición conocida,
+//  revisar PuntosBusqueda puntos en círculo alrededor (radio RadioBusqueda),
+//  parándose PausaBusqueda segundos en cada uno, y rendirse si se acaban los
+//  puntos o el tiempo (TiempoBusqueda).
+//
+//  En el árbol se monta así (ver DecisorBT.RamaBuscar):
 //
 //    Sequence "Busqueda"
-//      ├── IrA (última posición conocida)
-//      ├── Repeat x N
-//      │     └── Sequence
-//      │           ├── ElegirPuntoDeBusqueda   ← este fichero
-//      │           ├── IrA (punto elegido)
-//      │           └── Esperar                 ← este fichero
-//      ├── Esperar
-//      └── OlvidarUltimaPos                    ← este fichero
+//      ├── MarcarBusquedaPendiente
+//      ├── Succeeder
+//      │     └── LimiteDeTiempo (TiempoBusqueda)
+//      │           └── Sequence "RecorrerZona"
+//      │                 ├── IrA (ultimaPos) → Detenerse → Esperar
+//      │                 ├── PrepararPuntosDeBusqueda
+//      │                 └── Repeat x PuntosBusqueda
+//      │                       └── ElegirPuntoDeBusqueda → IrA → Detenerse → Esperar
+//      └── TerminarBusqueda
 //
-//  Esa es la gracia de un árbol: piezas pequeñas y reutilizables (IrA y
-//  Esperar aparecen varias veces) que se combinan.
+//  ¿Dónde está el «por qué punto voy»? En la pizarra (AnguloBusqueda), no en
+//  un nodo. Los nodos no guardan en qué paso de la búsqueda están: eso lo
+//  dicen la forma del árbol (Sequence, Repeat) y la pizarra.
 // ═══════════════════════════════════════════════════════════════════════════
 
 using UnityEngine;
@@ -24,79 +30,97 @@ using UDIT.IA3.BT;
 namespace UDIT.IA3.Guardia
 {
     /// <summary>
-    /// Elige un punto al azar alrededor de la última posición conocida y lo
-    /// apunta en la pizarra (ClavesBB.PuntoBusqueda) para que un IrA vaya allí.
-    /// Termina en el mismo tick: siempre Success.
+    /// Apunta en la pizarra que hay una búsqueda pendiente: «lo he tenido en
+    /// alerta y todavía no he terminado de buscarlo». Siempre Success.
     ///
-    /// ¿Por qué no elegir el punto dentro de la lambda del IrA? Porque esa lambda
-    /// se evalúa en CADA tick: elegiría un punto distinto cada décima de segundo
-    /// y el guardia daría tumbos. Elegir y luego ir son dos pasos separados.
+    /// Hace falta porque la FSM sigue buscando aunque la sospecha baje a
+    /// Sospecha o a Tranquilo: una vez en EstadoBuscar, solo sale al terminar
+    /// la búsqueda o al volver a verlo en alerta. La FSM lo «recuerda» porque
+    /// está en ese estado. El árbol no tiene estado actual: necesita que ese
+    /// recuerdo esté en la pizarra. (Material para la comparativa §5.E.)
     /// </summary>
-    public class ElegirPuntoDeBusqueda : Node
+    public class MarcarBusquedaPendiente : Node
     {
-        private readonly float _radio;
-
-        public ElegirPuntoDeBusqueda(string nombre, float radio) : base(nombre)
-        {
-            _radio = radio;
-        }
+        public MarcarBusquedaPendiente(string nombre) : base(nombre) { }
 
         protected override Status Update(Blackboard bb)
         {
-            Vector3 centro = bb.Get(ClavesBB.UltimaPos, Vector3.zero);
-            Vector2 azar = Random.insideUnitCircle * _radio;
-
-            // Si el punto cae dentro de una pared, el NavMeshAgent irá al punto
-            // alcanzable más cercano. No hace falta comprobarlo aquí (y no
-            // debemos: eso sería trabajo de la capa de movimiento).
-            bb.Set(ClavesBB.PuntoBusqueda, centro + new Vector3(azar.x, 0f, azar.y));
+            bb.Set(ClavesBB.BusquedaPendiente, true);
             return Status.Success;
         }
     }
 
     /// <summary>
-    /// Espera <c>segundos</c> y termina con Success. Es el «mirar alrededor» del
-    /// guardia: se queda quieto un momento en cada punto.
-    ///
-    /// Usa bb.Tiempo y no Time.time porque el runtime del árbol no depende de
-    /// UnityEngine: el tiempo lo escribe GuardiaAgente en la pizarra.
+    /// Elige al azar el ángulo del primer punto del círculo, para que no busque
+    /// siempre igual (como GenerarPuntos en EstadoBuscar). Siempre Success.
     /// </summary>
-    public class Esperar : Node
+    public class PrepararPuntosDeBusqueda : Node
     {
-        private readonly float _segundos;
-        private float _fin;
-
-        public Esperar(string nombre, float segundos) : base(nombre)
-        {
-            _segundos = segundos;
-        }
-
-        protected override void OnInitialize(Blackboard bb)
-        {
-            _fin = bb.Tiempo + _segundos;   // se recalcula cada vez que el nodo empieza
-        }
+        public PrepararPuntosDeBusqueda(string nombre) : base(nombre) { }
 
         protected override Status Update(Blackboard bb)
         {
-            return bb.Tiempo >= _fin ? Status.Success : Status.Running;
+            bb.Set(ClavesBB.AnguloBusqueda, Random.Range(0f, 360f));
+            return Status.Success;
         }
     }
 
     /// <summary>
-    /// Borra el recuerdo de la última posición: «he buscado y no hay nadie».
+    /// Calcula el siguiente punto del círculo alrededor de la última posición
+    /// conocida, lo escribe en ClavesBB.PuntoBusqueda (para que vaya un IrA) y
+    /// avanza el ángulo para el próximo. Siempre Success.
+    ///
+    /// Se calcula con matemáticas, sin Raycast: si el punto cae dentro de un
+    /// muro, el NavMeshAgent irá al punto alcanzable más cercano. Igual que en
+    /// la FSM.
+    ///
+    /// ¿Por qué no calcular el punto dentro de la lambda del IrA? Porque el IrA
+    /// evalúa su lambda una vez al empezar, pero el ángulo tiene que avanzar
+    /// exactamente una vez por punto. Elegir e ir son dos pasos distintos.
+    /// </summary>
+    public class ElegirPuntoDeBusqueda : Node
+    {
+        private readonly GuardiaAgente _agente;
+
+        public ElegirPuntoDeBusqueda(string nombre, GuardiaAgente agente) : base(nombre)
+        {
+            _agente = agente;
+        }
+
+        protected override Status Update(Blackboard bb)
+        {
+            int cantidad = Mathf.Max(1, _agente.PuntosBusqueda);
+            float angulo = bb.Get(ClavesBB.AnguloBusqueda, 0f);
+            Vector3 centro = bb.Get(ClavesBB.UltimaPos, _agente.transform.position);
+
+            float rad = angulo * Mathf.Deg2Rad;
+            Vector3 punto = centro + new Vector3(Mathf.Cos(rad), 0f, Mathf.Sin(rad)) * _agente.RadioBusqueda;
+
+            bb.Set(ClavesBB.PuntoBusqueda, punto);
+            bb.Set(ClavesBB.AnguloBusqueda, angulo + 360f / cantidad);
+            return Status.Success;
+        }
+    }
+
+    /// <summary>
+    /// «He buscado y no hay nadie»: olvida la última posición (caducidad) y
+    /// borra la búsqueda pendiente. Al hacerlo, la guarda de la rama Buscar
+    /// deja de cumplirse y el guardia vuelve a patrullar. Es el Rendirse() de
+    /// EstadoBuscar. Siempre Success.
     ///
     /// Según la tabla del enunciado, tieneUltimaPos la escriben el «sensor /
-    /// acción de buscar» y caduca «al llegar y no ver nada». Este nodo es esa
-    /// acción de buscar. Sin él, el guardia recordaría la posición para siempre
-    /// (error típico: «sin caducidad»).
+    /// acción de buscar» y caduca «al llegar y no ver nada». Esta es esa
+    /// acción de buscar. Sin ella el guardia recordaría la posición para
+    /// siempre (error típico: «sin caducidad»).
     /// </summary>
-    public class OlvidarUltimaPos : Node
+    public class TerminarBusqueda : Node
     {
-        public OlvidarUltimaPos(string nombre) : base(nombre) { }
+        public TerminarBusqueda(string nombre) : base(nombre) { }
 
         protected override Status Update(Blackboard bb)
         {
             bb.Set(ClavesBB.TieneUltimaPos, false);
+            bb.Set(ClavesBB.BusquedaPendiente, false);
             return Status.Success;
         }
     }

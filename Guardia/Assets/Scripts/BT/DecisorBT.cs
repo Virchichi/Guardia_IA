@@ -25,25 +25,6 @@ namespace UDIT.IA3.Guardia
 {
     public class DecisorBT : IDecisor
     {
-        // ── Parámetros de comportamiento ───────────────────────────────────
-        // Ajustadlos jugando. Si cambiáis alguno, cambiad también el valor
-        // equivalente en la FSM: las dos versiones deben comportarse igual.
-
-        /// <summary>Investigar: a cuántos metros del jugador se para el guardia.</summary>
-        private const float DistanciaInvestigar = 4f;
-
-        /// <summary>Buscar: radio alrededor de la última posición en el que revisa puntos.</summary>
-        private const float RadioBusqueda = 4f;
-
-        /// <summary>Buscar: cuántos puntos revisa antes de rendirse.</summary>
-        private const int PuntosDeBusqueda = 3;
-
-        /// <summary>Buscar: segundos que se queda mirando en cada punto.</summary>
-        private const float EsperaEnCadaPunto = 1.5f;
-
-        /// <summary>Buscar: segundos que espera al final, antes de volver a patrullar.</summary>
-        private const float EsperaAntesDeRendirse = 2f;
-
         private readonly GuardiaAgente _agente;
         private BehaviorTree _arbol;
 
@@ -65,56 +46,81 @@ namespace UDIT.IA3.Guardia
         //  EL ÁRBOL
         // ───────────────────────────────────────────────────────────────────
         //
-        //   ActiveSelector "Guardia"   (reevalúa desde la izquierda en cada tick)
+        //   ActiveSelector "Guardia"            (reevalúa desde la izquierda en cada tick)
         //   │
-        //   ├── Monitor "Perseguir"
-        //   │     guarda: ¿lo veo?  Y  ¿nivel ≥ Alerta?
-        //   │     cuerpo: Seguir(ultimaPos)
+        //   ├── Monitor "Combate"               guarda: ¿Alerta? Y ¿lo veo?
+        //   │     └── Sequence "Combatir"
+        //   │           ├── MarcarBusquedaPendiente
+        //   │           └── ActiveSelector "AtacarOPerseguir"
+        //   │                 ├── Monitor "Atacar"     guarda: ¿a tiro?  → Disparar
+        //   │                 └── Seguir "Perseguir"
         //   │
-        //   ├── Monitor "Investigar"
-        //   │     guarda: ¿lo veo?  Y  ¿nivel ≥ Sospecha?
-        //   │     cuerpo: Seguir(ultimaPos, parándose a DistanciaInvestigar)
+        //   ├── Monitor "Buscar"                guarda: ¿búsqueda pendiente? O ¿Alerta?
+        //   │     └── Sequence "Busqueda"
+        //   │           ├── MarcarBusquedaPendiente
+        //   │           ├── Succeeder → LimiteDeTiempo (TiempoBusqueda)
+        //   │           │     └── Sequence "RecorrerZona"
+        //   │           │           ├── IrA(ultimaPos) → Detenerse → Esperar(PausaBusqueda)
+        //   │           │           ├── PrepararPuntosDeBusqueda
+        //   │           │           └── Repeat x PuntosBusqueda
+        //   │           │                 └── ElegirPunto → IrA → Detenerse → Esperar
+        //   │           └── TerminarBusqueda
         //   │
-        //   ├── Monitor "Buscar"
-        //   │     guarda: ¿NO lo veo?  Y  ¿tengo última posición?  Y  ¿nivel ≥ Sospecha?
-        //   │     cuerpo: Sequence
-        //   │               ├── IrA(ultimaPos)
-        //   │               ├── Repeat x PuntosDeBusqueda
-        //   │               │     └── Sequence: ElegirPunto → IrA(punto) → Esperar
-        //   │               ├── Esperar
-        //   │               └── OlvidarUltimaPos
+        //   ├── Monitor "Investigar"            guarda: ¿Sospecha?
+        //   │     └── OlvidarSiFalsaAlarma
+        //   │           └── Sequence "Investigacion"
+        //   │                 ├── Detenerse → Esperar(PausaInvestigar)
+        //   │                 └── AcercarseConCautela
         //   │
-        //   └── Patrullar   (sin condición: es lo que hace si no pasa nada más)
+        //   └── RepetirSiempre "Patrullar"
+        //         └── Sequence "Ronda"
+        //               ├── ¿Tengo ruta?
+        //               ├── IrA(waypoint) → AvanzarRuta
+        //               └── Detenerse → Esperar(TiempoDescanso)
+        //
+        // EQUIVALENCIA CON LA FSM (apartado D):
+        //
+        //   Rama del árbol        Estado(s) de la FSM
+        //   ──────────────────    ─────────────────────────────
+        //   Combate → Atacar      EstadoAtacar
+        //   Combate → Perseguir   EstadoPerseguir (mientras lo ve)
+        //   Buscar                EstadoPerseguir (sin verlo) + EstadoBuscar
+        //   Investigar            EstadoInvestigar
+        //   Patrullar             EstadoPatrullar + EstadoIdle
+        //
+        //   Todos los tiempos, distancias y radios se leen de GuardiaAgente, los
+        //   mismos campos que usa la FSM. Cambiarlos en el inspector cambia a los
+        //   dos cerebros a la vez.
         //
         // DECISIONES DE DISEÑO (para la memoria):
         //
-        //  · Las ramas se ordenan por PRIORIDAD: perseguir > investigar > buscar
-        //    > patrullar. El ActiveSelector garantiza que una rama más prioritaria
-        //    interrumpe a la que esté corriendo (ver al jugador corta la patrulla).
+        //  · Ramas ordenadas por PRIORIDAD con ActiveSelector: ver al jugador en
+        //    alerta interrumpe cualquier otra cosa (patrulla, investigación o
+        //    búsqueda), igual que en la FSM.
         //
-        //  · Se usa Monitor y no Sequence porque la condición debe seguir
-        //    cumpliéndose DURANTE la acción. Con una Sequence, la condición solo
-        //    se mira al empezar, y el guardia perseguiría a un jugador que ya no ve.
+        //  · Monitor y no Sequence: las guardas se vuelven a mirar en cada tick.
+        //    Con una Sequence, el guardia seguiría disparando a quien ya no ve.
         //
-        //  · Perseguir e Investigar exigen VERLO ahora. En cuanto lo pierde de
-        //    vista, esas guardas fallan y entra Buscar, aunque el nivel siga en
-        //    Alerta. Así se cumple la tabla del §3: «lo pierde de vista → busca
-        //    alrededor de la última posición conocida».
+        //  · Combate exige Alerta Y verlo. Si lo pierde de vista (aunque siga en
+        //    Alerta), entra Buscar, cuyo primer paso es ir a la última posición
+        //    conocida: lo mismo que hace EstadoPerseguir sin verlo, seguido de
+        //    EstadoBuscar al llegar.
         //
-        //  · Buscar exige además nivel ≥ Sospecha. Si la sospecha decae hasta
-        //    Tranquilo a mitad de búsqueda, el guardia se rinde y vuelve a
-        //    patrullar. Eso es el «tras un tiempo» del §3, y lo marca el
-        //    decaimiento del sensor, no un temporizador del árbol.
+        //  · Buscar va DELANTE de Investigar. En la FSM, una vez buscando, el
+        //    guardia sigue buscando aunque la sospecha baje a Sospecha o a
+        //    Tranquilo. En el árbol eso lo consigue la clave BusquedaPendiente:
+        //    mientras valga true, la rama Buscar tiene prioridad sobre
+        //    Investigar y Patrullar. Es la diferencia más interesante entre
+        //    las dos arquitecturas: la FSM recuerda «dónde estaba» porque tiene
+        //    un estado actual; el árbol no lo tiene, y ese recuerdo tiene que
+        //    vivir en la pizarra.
         //
-        //  · Si lo ve estando en Tranquilo, no reacciona: sigue patrullando
-        //    mientras la sospecha sube. Ese tramo intermedio es justo lo que hace
-        //    que el guardia sea un medidor y no un interruptor.
+        //  · Recargar no es una rama: la recarga la gestiona AtaqueDistancia (capa
+        //    de acción), igual que con la FSM. El árbol solo pide disparar.
         //
-        //  · Ningún nodo guarda «en qué estado estoy». Qué hace el guardia sale
-        //    únicamente de la forma del árbol y de lo que dice la pizarra.
-        //
-        //  · Ningún nodo mira el mundo ni mueve al guardia: leen la pizarra y
-        //    escriben Destino/TieneDestino. LocomocionNavMesh hace el resto.
+        //  · Ningún nodo guarda «en qué estado está el guardia». Ningún nodo mira
+        //    el mundo (Raycast, sensor) ni mueve (SetDestination, NavMeshAgent):
+        //    leen la pizarra y escriben intenciones (Destino, QuiereDisparar).
 
         private Node ConstruirArbol()
         {
@@ -124,66 +130,95 @@ namespace UDIT.IA3.Guardia
                                  "Mirad los apartados 3.4 y 3.5 del README_Montaje.", _agente);
 
             return new ActiveSelector("Guardia",
-                RamaPerseguir(),
-                RamaInvestigar(),
+                RamaCombate(),
                 RamaBuscar(),
-                new Patrullar("Patrullar", ruta)
+                RamaInvestigar(),
+                RamaPatrullar(ruta)
             );
         }
 
-        // ── Rama 1 · PERSEGUIR ────────────────────────────────────────────
-        // Mientras lo vea y esté en alerta, va a por él. El sensor actualiza
-        // ultimaPos en cada frame en que lo ve, así que seguir ultimaPos es
-        // seguir al jugador.
-        private Node RamaPerseguir()
+        // ── Rama 1 · COMBATE (atacar o perseguir) ─────────────────────────
+        // Lo ve y está en alerta. Si está a tiro, se para y dispara; si no, va
+        // a por él. El ActiveSelector interior permite pasar de perseguir a
+        // disparar (y al revés) en cuanto cambia la distancia.
+        private Node RamaCombate()
         {
-            return new Monitor("Perseguir",
-                new Sequence("¿Lo veo y estoy en alerta?",
-                    new CondicionClave("¿Visible?", ClavesBB.Visible, true),
-                    new CondicionNivelAlMenos("¿Alerta?", NivelSospecha.Alerta)),
-                new Seguir("IrAlJugador", UltimaPosicion));
+            return new Monitor("Combate",
+                new Sequence("¿Alerta y lo veo?",
+                    new CondicionNivel("¿Alerta?", NivelSospecha.Alerta),
+                    new CondicionClave("¿Visible?", ClavesBB.Visible, true)),
+                new Sequence("Combatir",
+                    new MarcarBusquedaPendiente("RecordarQueHayQueBuscar"),
+                    new ActiveSelector("AtacarOPerseguir",
+                        new Monitor("Atacar",
+                            new CondicionEnRangoDeDisparo("¿ATiro?", _agente),
+                            new Disparar("Disparar")),
+                        new Seguir("Perseguir"))));
         }
 
-        // ── Rama 2 · INVESTIGAR ───────────────────────────────────────────
-        // «Se orienta o se acerca, sin comprometerse aún»: se acerca, pero se
-        // detiene a DistanciaInvestigar metros. Al moverse hacia él, el
-        // NavMeshAgent lo orienta en esa dirección.
-        private Node RamaInvestigar()
-        {
-            return new Monitor("Investigar",
-                new Sequence("¿Lo veo y sospecho?",
-                    new CondicionClave("¿Visible?", ClavesBB.Visible, true),
-                    new CondicionNivelAlMenos("¿Sospecha?", NivelSospecha.Sospecha)),
-                new Seguir("AcercarseConCautela", UltimaPosicion,
-                           _agente.transform, DistanciaInvestigar));
-        }
-
-        // ── Rama 3 · BUSCAR ───────────────────────────────────────────────
-        // Lo ha perdido de vista: va a la última posición conocida, revisa
-        // varios puntos alrededor, espera un poco y, si no ha vuelto a verlo,
-        // olvida la posición. Al olvidarla, la guarda falla y vuelve a patrullar.
+        // ── Rama 2 · BUSCAR ───────────────────────────────────────────────
+        // Lo ha perdido de vista (o lo perdió hace poco y aún no ha terminado
+        // de buscar). Va a la última posición, revisa puntos en círculo y, si
+        // se acaban los puntos o el tiempo, se rinde: olvida la posición y la
+        // guarda deja de cumplirse, así que vuelve a patrullar.
         private Node RamaBuscar()
         {
             return new Monitor("Buscar",
-                new Sequence("¿Lo he perdido?",
-                    new CondicionClave("¿NoVisible?", ClavesBB.Visible, false),
-                    new CondicionClave("¿TengoUltimaPos?", ClavesBB.TieneUltimaPos, true),
-                    new CondicionNivelAlMenos("¿Sospecha?", NivelSospecha.Sospecha)),
+                new Selector("¿Hay que buscar?",
+                    new CondicionClave("¿BusquedaPendiente?", ClavesBB.BusquedaPendiente, true),
+                    new CondicionNivel("¿Alerta?", NivelSospecha.Alerta)),
                 new Sequence("Busqueda",
-                    new IrA("IrAUltimaPos", UltimaPosicion),
-                    new Repeat(PuntosDeBusqueda,
-                        new Sequence("RevisarPunto",
-                            new ElegirPuntoDeBusqueda("ElegirPunto", RadioBusqueda),
-                            new IrA("IrAPunto", bb => bb.Get(ClavesBB.PuntoBusqueda, Vector3.zero)),
-                            new Esperar("MirarAlrededor", EsperaEnCadaPunto))),
-                    new Esperar("UltimoVistazo", EsperaAntesDeRendirse),
-                    new OlvidarUltimaPos("OlvidarUltimaPos")));
+                    new MarcarBusquedaPendiente("RecordarQueHayQueBuscar"),
+                    new Succeeder(
+                        new LimiteDeTiempo("MaximoTiempoBusqueda", () => _agente.TiempoBusqueda,
+                            new Sequence("RecorrerZona",
+                                new IrA("IrAUltimaPos", UltimaPosicion),
+                                new Detenerse("Pararse"),
+                                new Esperar("MirarAlrededor", () => _agente.PausaBusqueda),
+                                new PrepararPuntosDeBusqueda("PrepararPuntos"),
+                                new Repeat(_agente.PuntosBusqueda,
+                                    new Sequence("RevisarPunto",
+                                        new ElegirPuntoDeBusqueda("ElegirPunto", _agente),
+                                        new IrA("IrAPunto", bb => bb.Get(ClavesBB.PuntoBusqueda, Vector3.zero)),
+                                        new Detenerse("Pararse"),
+                                        new Esperar("MirarAlrededor", () => _agente.PausaBusqueda)))))),
+                    new TerminarBusqueda("Rendirse")));
+        }
+
+        // ── Rama 3 · INVESTIGAR ───────────────────────────────────────────
+        // «¿Qué ha sido eso?»: se para, espera un momento y se acerca un poco
+        // hacia lo que ha visto, sin comprometerse. Si la sospecha se calma,
+        // OlvidarSiFalsaAlarma borra la última posición (como la FSM).
+        private Node RamaInvestigar()
+        {
+            return new Monitor("Investigar",
+                new CondicionNivel("¿Sospecha?", NivelSospecha.Sospecha),
+                new OlvidarSiFalsaAlarma("OlvidarSiFalsaAlarma",
+                    new Sequence("Investigacion",
+                        new Detenerse("PararseEnSeco"),
+                        new Esperar("Pausa", () => _agente.PausaInvestigar),
+                        new AcercarseConCautela("AcercarseConCautela", _agente))));
+        }
+
+        // ── Rama 4 · PATRULLAR ────────────────────────────────────────────
+        // Sin condición: es lo que hace si no pasa nada más. Una ronda = ir al
+        // waypoint, pasar al siguiente y descansar (EstadoPatrullar + EstadoIdle).
+        // RepetirSiempre encadena rondas sin fin.
+        private Node RamaPatrullar(RutaPatrulla ruta)
+        {
+            return new RepetirSiempre("Patrullar",
+                new Sequence("Ronda",
+                    new Condition("¿TengoRuta?", bb => ruta != null && ruta.TieneRuta),
+                    new IrA("IrAWaypoint", bb => ruta.PuntoActual),
+                    new AvanzarRuta("SiguienteWaypoint", ruta),
+                    new Detenerse("Pararse"),
+                    new Esperar("Descansar", () => _agente.TiempoDescanso)));
         }
 
         /// <summary>
-        /// Lee la última posición conocida del jugador. Es un método con la misma
-        /// forma que Func&lt;Blackboard, Vector3&gt;, así que se puede pasar
-        /// directamente donde se espera una lambda (IrA, Seguir).
+        /// Lee la última posición conocida del jugador. Tiene la misma forma que
+        /// Func&lt;Blackboard, Vector3&gt;, así que se puede pasar directamente
+        /// donde se espera una lambda (como en IrA).
         /// </summary>
         private static Vector3 UltimaPosicion(Blackboard bb)
         {

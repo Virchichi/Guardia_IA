@@ -56,6 +56,15 @@ namespace UDIT.IA3.Guardia
         /// durante la búsqueda. La elige ElegirPuntoDeBusqueda y la usa IrA.</summary>
         public const string PuntoBusqueda = "puntoBusqueda";
 
+        /// <summary>float · ángulo (grados) del siguiente punto del círculo de búsqueda.
+        /// Lo sortea PrepararPuntosDeBusqueda y lo avanza ElegirPuntoDeBusqueda.</summary>
+        public const string AnguloBusqueda = "anguloBusqueda";
+
+        /// <summary>bool · lo he tenido en alerta y aún no he terminado de buscarlo.
+        /// La pone a true la rama de combate (o la búsqueda al empezar); la borra
+        /// TerminarBusqueda. Es lo que en la FSM «recuerda» estar en EstadoBuscar.</summary>
+        public const string BusquedaPendiente = "busquedaPendiente";
+
         // ── Las escribe el MOVIMIENTO, las lee la DECISIÓN ─────────────────
 
         /// <summary>bool · ¿he llegado ya al destino que me pidieron?</summary>
