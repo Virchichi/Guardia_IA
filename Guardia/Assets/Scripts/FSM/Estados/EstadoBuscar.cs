@@ -31,6 +31,7 @@ namespace UDIT.IA3.Guardia
         internal override void Enter()
         {
             _inicio = Pizarra.Tiempo;
+            Pizarra.Set(ClavesBB.BusquedaPendiente, true);
 
             Vector3 centro = Pizarra.Get(ClavesBB.UltimaPos, Agente.transform.position);
             _puntos = GenerarPuntos(centro, Agente.RadioBusqueda, Agente.PuntosBusqueda);
@@ -104,6 +105,7 @@ namespace UDIT.IA3.Guardia
         private void Rendirse()
         {
             Pizarra.Set(ClavesBB.TieneUltimaPos, false);
+            Pizarra.Set(ClavesBB.BusquedaPendiente, false);   // igual que TerminarBusqueda del árbol
             StateMachine.ChangeState(new EstadoPatrullar(StateMachine));
         }
 

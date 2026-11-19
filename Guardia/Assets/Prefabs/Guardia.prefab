@@ -2321,6 +2321,7 @@ GameObject:
   - component: {fileID: 5646365273808456603}
   - component: {fileID: 569060955093702888}
   - component: {fileID: 4969351286265505695}
+  - component: {fileID: 452976963492538260}
   m_Layer: 0
   m_Name: Guardia
   m_TagString: Untagged
@@ -2559,6 +2560,7 @@ MonoBehaviour:
   dispersionBase: 1
   dispersionPorMetro: 0.8
   dispersionMax: 12
+  buenaPunteria: 0
 --- !u!95 &5646365273808456603
 Animator:
   serializedVersion: 7
@@ -2614,6 +2616,21 @@ MonoBehaviour:
   VelocidadCorrer: 4
   AceleracionCorrer: 20
   GiroCorrer: 540
+--- !u!114 &452976963492538260
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8908783815359892586}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92c2b24f5886fff408a81566ef0ff9a5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UDIT.IA3.Guardia.IndicadorSospecha
+  Altura: 1.3
+  MostrarBarra: 1
+  MostrarCerebro: 1
 --- !u!1 &8949073845540588318
 GameObject:
   m_ObjectHideFlags: 0

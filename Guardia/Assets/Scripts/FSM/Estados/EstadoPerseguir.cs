@@ -6,8 +6,8 @@
 //  posición conocida; al llegar sin verlo, pasa a Buscar.
 //
 //  Transiciones (todas leyendo la pizarra):
-//    · nivel baja de Alerta          → Buscar (o Patrullar si no hay ultimaPos)
-//    · no visible y ha llegado       → Buscar
+//    · nivel baja de Alerta          → Buscar
+//    · deja de verlo                 → Buscar
 //    · visible y a DistanciaDisparo  → Atacar
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -24,25 +24,28 @@ namespace UDIT.IA3.Guardia
             // HaLlegado puede seguir a true de cuando estaba parado. Lo
             // reseteamos para que el primer Execute no crea que ya ha llegado.
             Pizarra.Set(ClavesBB.HaLlegado, false);
+            // Igual que MarcarBusquedaPendiente del árbol: si lo pierdo, toca buscar.
+            Pizarra.Set(ClavesBB.BusquedaPendiente, true);
             PedirIrAUltimaPos();
         }
 
         internal override void Execute()
         {
             NivelSospecha nivel = Pizarra.Get(ClavesBB.Nivel, NivelSospecha.Tranquilo);
-            bool tieneUltimaPos = Pizarra.Get(ClavesBB.TieneUltimaPos, false);
 
             // ── 1. ¿Se ha calmado? (la histéresis ya está aplicada en el sensor)
             if (nivel != NivelSospecha.Alerta)
             {
-                if (tieneUltimaPos) StateMachine.ChangeState(new EstadoBuscar(StateMachine));
-                else                StateMachine.ChangeState(new EstadoPatrullar(StateMachine));
+                StateMachine.ChangeState(new EstadoBuscar(StateMachine));
                 return;
             }
 
             // ── 2. Lo he perdido de vista y ya estoy donde lo vi → buscar
             bool visible = Pizarra.Get(ClavesBB.Visible, false);
-            if (!visible && Pizarra.Get(ClavesBB.HaLlegado, false))
+            // En cuanto deja de verlo, a buscar (la búsqueda empieza yendo a
+            // ultimaPos). Igual que el árbol, cuya rama Combate exige «Alerta y
+            // visible»: así el tiempo de búsqueda cuenta desde el mismo momento.
+            if (!visible)
             {
                 StateMachine.ChangeState(new EstadoBuscar(StateMachine));
                 return;

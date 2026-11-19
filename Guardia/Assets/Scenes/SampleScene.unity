@@ -1641,9 +1641,17 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 2031718361710799158, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
+      propertyPath: Alcance
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 2031718361710799158, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
       propertyPath: Objetivo
       value: 
       objectReference: {fileID: 1290113784}
+    - target: {fileID: 2031718361710799158, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
+      propertyPath: AnguloVision
+      value: 120
+      objectReference: {fileID: 0}
     - target: {fileID: 3656498443694003832, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
       propertyPath: 'Puntos.Array.data[0]'
       value: 

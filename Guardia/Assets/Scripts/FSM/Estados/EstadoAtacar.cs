@@ -8,8 +8,8 @@
 //  LocomocionNavMesh lo ejecuta.
 //
 //  Transiciones (todas leyendo la pizarra):
-//    · nivel baja de Alerta                  → Buscar (o Patrullar si no hay ultimaPos)
-//    · deja de verlo                         → Perseguir (va a la última posición)
+//    · nivel baja de Alerta                  → Buscar
+//    · deja de verlo                         → Buscar (empieza yendo a la última posición)
 //    · se aleja más de Distancia + Margen    → Perseguir
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -25,6 +25,7 @@ namespace UDIT.IA3.Guardia
         {
             // Para disparar se queda quieto.
             Pizarra.Set(ClavesBB.TieneDestino, false);
+            Pizarra.Set(ClavesBB.BusquedaPendiente, true);
         }
 
         internal override void Execute()
@@ -35,17 +36,14 @@ namespace UDIT.IA3.Guardia
             // ── 1. Se ha calmado
             if (nivel != NivelSospecha.Alerta)
             {
-                if (Pizarra.Get(ClavesBB.TieneUltimaPos, false))
-                    StateMachine.ChangeState(new EstadoBuscar(StateMachine));
-                else
-                    StateMachine.ChangeState(new EstadoPatrullar(StateMachine));
+                StateMachine.ChangeState(new EstadoBuscar(StateMachine));
                 return;
             }
 
             // ── 2. Ya no lo ve: a perseguir hasta donde lo vio por última vez
             if (!visible)
             {
-                StateMachine.ChangeState(new EstadoPerseguir(StateMachine));
+                StateMachine.ChangeState(new EstadoBuscar(StateMachine));
                 return;
             }
 

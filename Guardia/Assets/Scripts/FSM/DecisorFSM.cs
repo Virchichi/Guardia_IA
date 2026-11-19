@@ -25,12 +25,33 @@ namespace UDIT.IA3.Guardia
         public void Iniciar(Blackboard bb)
         {
             _maquina = new StateMachine(_agente, bb);
-            _maquina.Start(new EstadoPatrullar(_maquina));
+            _maquina.Start(EstadoSegunPizarra(bb));
         }
 
         public void Decidir(Blackboard bb)
         {
             _maquina.Execute();
+        }
+
+        /// <summary>
+        /// Estado inicial deducido de la pizarra, con la MISMA prioridad que el
+        /// ActiveSelector del árbol (Combate > Buscar > Investigar > Patrullar).
+        /// Así, al cambiar del árbol a la FSM en caliente, la FSM continúa lo
+        /// que estaba haciendo el guardia en vez de volver siempre a patrullar.
+        /// No se guarda «en qué estado estaba»: se calcula de lo que sabe.
+        /// </summary>
+        private State EstadoSegunPizarra(Blackboard bb)
+        {
+            NivelSospecha nivel = bb.Get(ClavesBB.Nivel, NivelSospecha.Tranquilo);
+            bool visible = bb.Get(ClavesBB.Visible, false);
+
+            if (nivel == NivelSospecha.Alerta && visible)
+                return new EstadoPerseguir(_maquina);      // pasa a Atacar si está a tiro
+            if (bb.Get(ClavesBB.BusquedaPendiente, false) || nivel == NivelSospecha.Alerta)
+                return new EstadoBuscar(_maquina);
+            if (nivel == NivelSospecha.Sospecha)
+                return new EstadoInvestigar(_maquina);
+            return new EstadoPatrullar(_maquina);
         }
 
         public string Traza
