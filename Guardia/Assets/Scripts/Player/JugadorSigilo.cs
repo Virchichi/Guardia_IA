@@ -110,6 +110,9 @@ namespace UDIT.IA3.Jugador
 
         void Update()
         {
+            // Juego pausado (PanelVictoria): el jugador no reacciona al input.
+            if (Time.timeScale == 0f) return;
+
             float dt = Time.deltaTime;
 
             Vector2 mover = Vector2.zero;

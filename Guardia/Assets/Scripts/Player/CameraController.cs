@@ -54,6 +54,9 @@ public class CameraController : MonoBehaviour
 
     private void Update()
     {
+        // Juego pausado (PanelVictoria): la cámara no gira con el ratón.
+        if (Time.timeScale == 0f) return;
+
         invertXVal = invertX ? -1 : 1;
         invertYVal = invertY ? -1 : 1;
     
