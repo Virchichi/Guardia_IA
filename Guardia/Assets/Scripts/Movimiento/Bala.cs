@@ -23,7 +23,6 @@ public class Bala : MonoBehaviour
         _tirador = tirador;
 
         Vector3 dir = direccion.normalized;
-        transform.rotation = Quaternion.LookRotation(dir) * Quaternion.Euler(0f, 90f, 90f);
         _rb.linearVelocity = dir * velocidad;
 
         Destroy(gameObject, vidaMax);
