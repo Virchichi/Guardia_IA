@@ -1664,6 +1664,14 @@ PrefabInstance:
       propertyPath: 'Puntos.Array.data[4]'
       value: 
       objectReference: {fileID: 818189802}
+    - target: {fileID: 4889429525727953635, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
+      propertyPath: prefabBala
+      value: 
+      objectReference: {fileID: 235787381227784641, guid: 94ae6be812fa3da4a94e829ab5c948e1, type: 3}
+    - target: {fileID: 4889429525727953635, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
+      propertyPath: buenaPunteria
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5587081764873940103, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
       propertyPath: m_LocalPosition.x
       value: 3.5980263

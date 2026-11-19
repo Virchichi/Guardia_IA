@@ -2104,7 +2104,7 @@ Transform:
   m_GameObject: {fileID: 7705375538927198503}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.167, y: 0, z: 0.503}
+  m_LocalPosition: {x: -0.17, y: 0.351, z: 0.503}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2556,6 +2556,9 @@ MonoBehaviour:
   alturaApuntado: 1
   velocidadGiro: 360
   anguloMaximoDisparo: 15
+  dispersionBase: 1
+  dispersionPorMetro: 0.8
+  dispersionMax: 12
 --- !u!95 &5646365273808456603
 Animator:
   serializedVersion: 7
