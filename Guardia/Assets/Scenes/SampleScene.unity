@@ -1174,15 +1174,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2031718361710799158, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
       propertyPath: Alcance
-      value: 20
+      value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 2031718361710799158, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
+      propertyPath: Objetivo
+      value: 
+      objectReference: {fileID: 1290113784}
+    - target: {fileID: 2031718361710799158, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
       propertyPath: AnguloVision
-      value: 120
-      objectReference: {fileID: 0}
-    - target: {fileID: 3656498443694003832, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
-      propertyPath: PingPong
-      value: 0
+      value: 70
       objectReference: {fileID: 0}
     - target: {fileID: 3656498443694003832, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
       propertyPath: Puntos.Array.size
@@ -1196,10 +1196,6 @@ PrefabInstance:
       propertyPath: 'Puntos.Array.data[1]'
       value: 
       objectReference: {fileID: 914585186}
-    - target: {fileID: 4889429525727953635, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
-      propertyPath: prefabBala
-      value: 
-      objectReference: {fileID: 235787381227784641, guid: 94ae6be812fa3da4a94e829ab5c948e1, type: 3}
     - target: {fileID: 5587081764873940103, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
       propertyPath: m_LocalPosition.x
       value: -1.5275326
@@ -1978,11 +1974,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2031718361710799158, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
       propertyPath: Alcance
-      value: 20
+      value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 2031718361710799158, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
+      propertyPath: Objetivo
+      value: 
+      objectReference: {fileID: 1290113784}
+    - target: {fileID: 2031718361710799158, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
       propertyPath: AnguloVision
-      value: 120
+      value: 70
       objectReference: {fileID: 0}
     - target: {fileID: 3656498443694003832, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
       propertyPath: PingPong
@@ -2585,17 +2585,24 @@ MonoBehaviour:
   distance: 5
   minVerticalAngle: -45
   maxVerticalAngle: 45
-  fraimingOffset: {x: 0, y: 0}
+  fraimingOffset: {x: 0.2, y: 1.4}
   invertX: 1
   invertY: 0
-  mouseSensitivityX: 1
-  mouseSensitivityY: 1
+  mouseSensitivityX: 0.13
+  mouseSensitivityY: 0.13
   normalFOV: 60
   runFOV: 75
   wallRunFOV: 78
   fovSpeed: 8
   tiltAngle: 15
   tiltSpeed: 5
+  collisionLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  collisionRadius: 0.25
+  collisionPadding: 0.1
+  minDistance: 0.6
+  returnSpeed: 6
 --- !u!1001 &335077012
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5417,11 +5424,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2031718361710799158, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
       propertyPath: Alcance
-      value: 20
+      value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 2031718361710799158, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
+      propertyPath: Objetivo
+      value: 
+      objectReference: {fileID: 1290113784}
+    - target: {fileID: 2031718361710799158, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
       propertyPath: AnguloVision
-      value: 120
+      value: 70
       objectReference: {fileID: 0}
     - target: {fileID: 3656498443694003832, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
       propertyPath: Puntos.Array.size
@@ -5882,11 +5893,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2031718361710799158, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
       propertyPath: Alcance
-      value: 20
+      value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 2031718361710799158, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
+      propertyPath: Objetivo
+      value: 
+      objectReference: {fileID: 1290113784}
+    - target: {fileID: 2031718361710799158, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
       propertyPath: AnguloVision
-      value: 120
+      value: 70
       objectReference: {fileID: 0}
     - target: {fileID: 3656498443694003832, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
       propertyPath: PingPong
@@ -11805,12 +11820,16 @@ PrefabInstance:
     m_TransformParent: {fileID: 2089611974}
     m_Modifications:
     - target: {fileID: 2031718361710799158, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
-      propertyPath: AnguloVision
-      value: 120
+      propertyPath: Alcance
+      value: 16
       objectReference: {fileID: 0}
-    - target: {fileID: 3656498443694003832, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
-      propertyPath: PingPong
-      value: 0
+    - target: {fileID: 2031718361710799158, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
+      propertyPath: Objetivo
+      value: 
+      objectReference: {fileID: 1290113784}
+    - target: {fileID: 2031718361710799158, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
+      propertyPath: AnguloVision
+      value: 70
       objectReference: {fileID: 0}
     - target: {fileID: 3656498443694003832, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
       propertyPath: Puntos.Array.size
@@ -11828,10 +11847,6 @@ PrefabInstance:
       propertyPath: 'Puntos.Array.data[2]'
       value: 
       objectReference: {fileID: 2042311847}
-    - target: {fileID: 4889429525727953635, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
-      propertyPath: buenaPunteria
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 5587081764873940103, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
       propertyPath: m_LocalPosition.x
       value: -1.2282417
@@ -12195,17 +12210,9 @@ PrefabInstance:
     m_TransformParent: {fileID: 2089611974}
     m_Modifications:
     - target: {fileID: 2031718361710799158, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
-      propertyPath: Alcance
-      value: 20
-      objectReference: {fileID: 0}
-    - target: {fileID: 2031718361710799158, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
-      propertyPath: AnguloVision
-      value: 120
-      objectReference: {fileID: 0}
-    - target: {fileID: 3656498443694003832, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
-      propertyPath: PingPong
-      value: 0
-      objectReference: {fileID: 0}
+      propertyPath: Objetivo
+      value: 
+      objectReference: {fileID: 1290113784}
     - target: {fileID: 3656498443694003832, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
       propertyPath: Puntos.Array.size
       value: 5
@@ -12230,22 +12237,6 @@ PrefabInstance:
       propertyPath: 'Puntos.Array.data[4]'
       value: 
       objectReference: {fileID: 1762819149}
-    - target: {fileID: 3656498443694003832, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
-      propertyPath: 'Puntos.Array.data[5]'
-      value: 
-      objectReference: {fileID: 1215259971}
-    - target: {fileID: 3656498443694003832, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
-      propertyPath: 'Puntos.Array.data[6]'
-      value: 
-      objectReference: {fileID: 88986526}
-    - target: {fileID: 4889429525727953635, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
-      propertyPath: prefabBala
-      value: 
-      objectReference: {fileID: 235787381227784641, guid: 94ae6be812fa3da4a94e829ab5c948e1, type: 3}
-    - target: {fileID: 4889429525727953635, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
-      propertyPath: buenaPunteria
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 5587081764873940103, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -12305,15 +12296,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2031718361710799158, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
       propertyPath: Alcance
-      value: 20
+      value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 2031718361710799158, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
+      propertyPath: Objetivo
+      value: 
+      objectReference: {fileID: 1290113784}
+    - target: {fileID: 2031718361710799158, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
       propertyPath: AnguloVision
-      value: 120
-      objectReference: {fileID: 0}
-    - target: {fileID: 3656498443694003832, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
-      propertyPath: PingPong
-      value: 0
+      value: 70
       objectReference: {fileID: 0}
     - target: {fileID: 3656498443694003832, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
       propertyPath: Puntos.Array.size
@@ -12343,14 +12334,6 @@ PrefabInstance:
       propertyPath: 'Puntos.Array.data[5]'
       value: 
       objectReference: {fileID: 251830327}
-    - target: {fileID: 4889429525727953635, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
-      propertyPath: prefabBala
-      value: 
-      objectReference: {fileID: 235787381227784641, guid: 94ae6be812fa3da4a94e829ab5c948e1, type: 3}
-    - target: {fileID: 4889429525727953635, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
-      propertyPath: buenaPunteria
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 5587081764873940103, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
       propertyPath: m_LocalPosition.x
       value: 19.61
@@ -13292,11 +13275,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2031718361710799158, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
       propertyPath: Alcance
-      value: 20
+      value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 2031718361710799158, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
+      propertyPath: Objetivo
+      value: 
+      objectReference: {fileID: 1290113784}
+    - target: {fileID: 2031718361710799158, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
       propertyPath: AnguloVision
-      value: 120
+      value: 70
       objectReference: {fileID: 0}
     - target: {fileID: 3656498443694003832, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
       propertyPath: PingPong
@@ -14247,16 +14234,12 @@ PrefabInstance:
     m_TransformParent: {fileID: 2089611974}
     m_Modifications:
     - target: {fileID: 2031718361710799158, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
-      propertyPath: Alcance
-      value: 20
-      objectReference: {fileID: 0}
+      propertyPath: Objetivo
+      value: 
+      objectReference: {fileID: 1290113784}
     - target: {fileID: 2031718361710799158, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
       propertyPath: AnguloVision
-      value: 120
-      objectReference: {fileID: 0}
-    - target: {fileID: 3656498443694003832, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
-      propertyPath: PingPong
-      value: 0
+      value: 70
       objectReference: {fileID: 0}
     - target: {fileID: 3656498443694003832, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
       propertyPath: Puntos.Array.size
@@ -14282,22 +14265,6 @@ PrefabInstance:
       propertyPath: 'Puntos.Array.data[4]'
       value: 
       objectReference: {fileID: 1762819149}
-    - target: {fileID: 3656498443694003832, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
-      propertyPath: 'Puntos.Array.data[5]'
-      value: 
-      objectReference: {fileID: 1215259971}
-    - target: {fileID: 3656498443694003832, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
-      propertyPath: 'Puntos.Array.data[6]'
-      value: 
-      objectReference: {fileID: 88986526}
-    - target: {fileID: 4889429525727953635, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
-      propertyPath: prefabBala
-      value: 
-      objectReference: {fileID: 235787381227784641, guid: 94ae6be812fa3da4a94e829ab5c948e1, type: 3}
-    - target: {fileID: 4889429525727953635, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
-      propertyPath: buenaPunteria
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 5587081764873940103, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
       propertyPath: m_LocalPosition.x
       value: 6.7
@@ -14640,25 +14607,9 @@ PrefabInstance:
     m_TransformParent: {fileID: 2089611974}
     m_Modifications:
     - target: {fileID: 2031718361710799158, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
-      propertyPath: Alcance
-      value: 20
-      objectReference: {fileID: 0}
-    - target: {fileID: 2031718361710799158, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
       propertyPath: Objetivo
       value: 
       objectReference: {fileID: 1290113784}
-    - target: {fileID: 2031718361710799158, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
-      propertyPath: AnguloVision
-      value: 120
-      objectReference: {fileID: 0}
-    - target: {fileID: 3656498443694003832, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
-      propertyPath: PingPong
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3656498443694003832, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
-      propertyPath: Puntos.Array.size
-      value: 6
-      objectReference: {fileID: 0}
     - target: {fileID: 3656498443694003832, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
       propertyPath: 'Puntos.Array.data[0]'
       value: 
@@ -14683,14 +14634,6 @@ PrefabInstance:
       propertyPath: 'Puntos.Array.data[5]'
       value: 
       objectReference: {fileID: 818189802}
-    - target: {fileID: 4889429525727953635, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
-      propertyPath: prefabBala
-      value: 
-      objectReference: {fileID: 235787381227784641, guid: 94ae6be812fa3da4a94e829ab5c948e1, type: 3}
-    - target: {fileID: 4889429525727953635, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
-      propertyPath: buenaPunteria
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 5587081764873940103, guid: bfff04a4179c8b44e8835c9611a21472, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.5219736

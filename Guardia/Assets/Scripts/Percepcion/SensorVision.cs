@@ -59,7 +59,27 @@ namespace UDIT.IA3.Guardia
 
         [Header("Cono de visión")]
         public float Alcance = 15f;
+        [Tooltip("Cono de visión DIRECTA (completo, en grados): el centro de la mirada. " +
+                 "Aquí la detección es más rápida.")]
         [Range(0f, 180f)] public float AnguloVision = 60f;
+
+        //----------------------------------------------------------------------------
+        //            NUESTRO · VISIÓN PERIFÉRICA
+        [Header("Visión periférica")]
+        [Tooltip("Cono PERIFÉRICO completo (grados). Debe ser mayor que AnguloVision. " +
+                 "Entre los dos conos está la periferia: se ve, pero se detecta más despacio.")]
+        [Range(0f, 360f)] public float AnguloPeriferico = 140f;
+
+        [Tooltip("Alcance de la visión periférica (m). Normalmente menor que el de la directa.")]
+        public float AlcancePeriferico = 8f;
+
+        [Tooltip("Ritmo de detección en la visión DIRECTA (multiplica la evidencia). 1 = normal.")]
+        [Range(0f, 2f)] public float RitmoDirecta = 1f;
+
+        [Tooltip("Ritmo de detección en la periferia, en el borde INTERIOR (junto a la directa). " +
+                 "Hacia el borde exterior baja hasta MinimoAngulo. Menor que RitmoDirecta = tarda más.")]
+        [Range(0f, 2f)] public float RitmoPeriferica = 0.45f;
+        //----------------------------------------------------------------------------
 
         [Tooltip("Desde dónde se mira. Si está vacío se usa el propio transform. " +
                  "Poned aquí la cabeza: mirar desde los pies da resultados raros.")]
@@ -111,7 +131,8 @@ namespace UDIT.IA3.Guardia
 
         [Tooltip("Mínimo de cada factor: evita que uno solo anule la detección por producto.")]
         [Range(0f, 1f)] public float MinimoDistancia = 0.2f;
-        [Range(0f, 1f)] public float MinimoAngulo = 0.3f;
+        [Tooltip("Ritmo en el borde EXTERIOR de la visión periférica (lo peor que se ve).")]
+        [Range(0f, 1f)] public float MinimoAngulo = 0.2f;
         [Range(0f, 1f)] public float MinimoMovimiento = 0.4f;
 
         [Header("Estabilidad (que no fluctúe)")]
@@ -127,6 +148,32 @@ namespace UDIT.IA3.Guardia
         [Range(0f, 1f)] public float Nervio = 0.25f;
         [Tooltip("Máximo de pérdidas que cuentan para el nervio, para que no deje de olvidar nunca.")]
         public int MaxPerdidasNervio = 3;
+
+        //----------------------------------------------------------------------------
+        //            NUESTRO · SEGUNDO SISTEMA: PROXIMIDAD (cuerpo a cuerpo)
+        [Header("Proximidad (cuerpo a cuerpo)")]
+        [Tooltip("Activa el segundo sistema: si el jugador se acerca demasiado, el guardia " +
+                 "lo nota aunque esté de espaldas (360°), como si lo oyera o lo sintiera.")]
+        public bool UsarProximidad = true;
+
+        [Tooltip("Radio (m) alrededor del guardia en el que nota al jugador sin verlo.")]
+        public float RadioProximidad = 1.8f;
+
+        [Tooltip("Multiplica el radio si el jugador va agachado: así se puede pasar " +
+                 "más pegado por la espalda. 1 = no cambia nada.")]
+        [Range(0f, 1f)] public float MultiplicadorRadioAgachado = 0.6f;
+
+        [Tooltip("Si está activo, la proximidad NO atraviesa paredes: hace falta que " +
+                 "no haya un muro entre el guardia y el torso del jugador.")]
+        public bool ProximidadRequiereLineaDirecta = true;
+
+        [Tooltip("Cuánto sube la sospecha por segundo mientras está dentro del radio. " +
+                 "2,5/s → de 0 a Alerta en ~0,3 s.")]
+        public float VelocidadSubidaProximidad = 2.5f;
+
+        [Tooltip("Si está activo, entrar en el radio pone la sospecha en Alerta al momento.")]
+        public bool ProximidadAlertaInstantanea = false;
+        //----------------------------------------------------------------------------
 
         // Estado interno del sensor. Lo publica en la pizarra al final de Percibir.
         private float _sospecha;
@@ -148,10 +195,13 @@ namespace UDIT.IA3.Guardia
         // Resultado de la última comprobación (los usa el medidor)
         private float _distancia;
         private float _angulo;
+        private bool _enPeriferica;
         private int _rayosQueLlegan;
 
         /// <summary>Solo para los gizmos: si la última comprobación dio positivo.</summary>
         public bool VisibleAhora { get; private set; }
+        /// <summary>Si este frame lo ha notado el sistema de proximidad (cuerpo a cuerpo).</summary>
+        public bool CercaAhora { get; private set; }
         public float SospechaActual { get { return _sospecha; } }
         public NivelSospecha NivelActual { get { return _nivel; } }
 
@@ -159,6 +209,8 @@ namespace UDIT.IA3.Guardia
         public float EvidenciaActual { get; private set; }
         public float FactorDistancia { get; private set; }
         public float FactorAngulo { get; private set; }
+        /// <summary>Si la última vez que lo vio fue con la visión periférica (no la directa).</summary>
+        public bool EnPerifericaAhora { get { return VisibleAhora && _enPeriferica; } }
         public float FactorVisibilidad { get; private set; }
         public float FactorMovimiento { get; private set; }
         public float FactorPostura { get; private set; }
@@ -191,9 +243,16 @@ namespace UDIT.IA3.Guardia
             float dt = Time.deltaTime;
             MedirVelocidadObjetivo(dt);
 
-            // ── ¿Lo veo? ────────────────────────────────────────────────────
-            bool vistoEsteFrame = ComprobarVision();
-            VisibleAhora = vistoEsteFrame;
+            // ── ¿Lo veo? ¿Lo noto cerca? ────────────────────────────────────
+            // Dos sistemas independientes: la VISIÓN (cono + oclusión + medidor)
+            // y la PROXIMIDAD (radio 360° cuerpo a cuerpo). Basta con uno de
+            // los dos para que cuente como detectado este frame.
+            bool vistoPorVision = ComprobarVision();
+            bool notadoCerca = UsarProximidad && ComprobarProximidad();
+            VisibleAhora = vistoPorVision;
+            CercaAhora = notadoCerca;
+
+            bool vistoEsteFrame = vistoPorVision || notadoCerca;
 
             if (vistoEsteFrame)
             {
@@ -208,7 +267,7 @@ namespace UDIT.IA3.Guardia
             bool visible = sinVerlo <= TiempoGracia;
 
             // ── El medidor ──────────────────────────────────────────────────
-            ActualizarSospecha(vistoEsteFrame, sinVerlo, bb, dt);
+            ActualizarSospecha(vistoPorVision, notadoCerca, sinVerlo, bb, dt);
 
             // ── Publicar en la pizarra ──────────────────────────────────────
             bb.Set(ClavesBB.Visible, visible);
@@ -267,7 +326,15 @@ namespace UDIT.IA3.Guardia
             _distancia = haciaPlano.magnitude;
             _angulo = Vector3.Angle(adelante, haciaPlano);
 
-            if (_angulo > AnguloVision * 0.5f) return false;
+            // Dos conos: dentro de AnguloVision es visión DIRECTA; entre ese y
+            // AnguloPeriferico es visión PERIFÉRICA (con su propio alcance).
+            float medioDirecto = AnguloVision * 0.5f;
+            float medioPeriferico = Mathf.Max(AnguloPeriferico, AnguloVision) * 0.5f;
+
+            if (_angulo > medioPeriferico) return false;
+
+            _enPeriferica = _angulo > medioDirecto;
+            if (_enPeriferica && _distancia > AlcancePeriferico) return false;
 
             // ETAPA 3 · OCLUSIÓN ✅
             //
@@ -295,6 +362,28 @@ namespace UDIT.IA3.Guardia
             if (RayoLlega(pivote + Vector3.up * AlturaPies))   _rayosQueLlegan++;
 
             return _rayosQueLlegan > 0;
+        }
+
+        /// <summary>
+        /// SEGUNDO SISTEMA · PROXIMIDAD. Solo distancia (360°, sin cono): si el
+        /// jugador está pegado al guardia, lo nota aunque esté de espaldas.
+        /// Primero la distancia (barato) y, si hace falta, un único raycast al
+        /// torso para que no lo note a través de una pared.
+        /// </summary>
+        private bool ComprobarProximidad()
+        {
+            float radio = RadioProximidad;
+            if (_objetivoSigilo != null && _objetivoSigilo.FactorPostura < 0.999f)
+                radio *= MultiplicadorRadioAgachado;
+
+            Vector3 delta = Objetivo.position - transform.position;
+            delta.y = 0f;
+            if (delta.sqrMagnitude > radio * radio) return false;
+
+            if (!ProximidadRequiereLineaDirecta) return true;
+
+            float torso = _objetivoSigilo != null ? _objetivoSigilo.AlturaVisible * 0.55f : AlturaTorso;
+            return RayoLlega(Objetivo.position + Vector3.up * torso);
         }
 
         private bool RayoLlega(Vector3 punto)
@@ -332,27 +421,42 @@ namespace UDIT.IA3.Guardia
         //  EL MEDIDOR DE SOSPECHA
         // ───────────────────────────────────────────────────────────────────
 
-        private void ActualizarSospecha(bool vistoEsteFrame, float sinVerlo, Blackboard bb, float dt)
+        private void ActualizarSospecha(bool vistoEsteFrame, bool notadoCerca, float sinVerlo, Blackboard bb, float dt)
         {
+            // ── PROXIMIDAD: sube muy rápido (o salta a Alerta), con independencia
+            //    del cono y de los factores de la visión.
+            if (notadoCerca)
+            {
+                if (ProximidadAlertaInstantanea)
+                    _sospecha = Mathf.Max(_sospecha, UmbralAlerta);
+                else
+                    _sospecha += VelocidadSubidaProximidad * dt;
+            }
+
             if (vistoEsteFrame)
             {
                 // ── 1) EVIDENCIA en [0,1] ───────────────────────────────────
                 //
                 // · Distancia: 1 a DistanciaCercana o menos, baja hasta el alcance.
-                // · Ángulo: 1 en el centro del cono, baja hacia los bordes
-                //   (la visión periférica nota menos).
+                // · Ángulo (dos zonas): en la visión DIRECTA vale RitmoDirecta;
+                //   en la PERIFÉRICA vale RitmoPeriferica junto a la directa y
+                //   baja hasta MinimoAngulo en el borde exterior.
                 // · Visibilidad parcial: rayos que llegan / 3.
                 // · Movimiento (el nuestro): quieto se nota menos que corriendo.
                 //
                 // PRODUCTO con mínimos (Lerp desde el mínimo hasta 1): las malas
                 // condiciones se acumulan, pero ningún factor solo la anula.
-                float medioCono = Mathf.Max(0.01f, AnguloVision * 0.5f);
+                float medioDirecto = AnguloVision * 0.5f;
+                float medioPeriferico = Mathf.Max(AnguloPeriferico, AnguloVision) * 0.5f;
 
                 FactorDistancia = Mathf.Lerp(MinimoDistancia, 1f,
                     Mathf.InverseLerp(Alcance, DistanciaCercana, _distancia));
 
-                FactorAngulo = Mathf.Lerp(MinimoAngulo, 1f,
-                    Mathf.InverseLerp(medioCono, 0f, _angulo));
+                if (!_enPeriferica)
+                    FactorAngulo = RitmoDirecta;
+                else
+                    FactorAngulo = Mathf.Lerp(MinimoAngulo, RitmoPeriferica,
+                        Mathf.InverseLerp(medioPeriferico, medioDirecto, _angulo));
 
                 FactorVisibilidad = _rayosQueLlegan / 3f;
 
@@ -368,7 +472,7 @@ namespace UDIT.IA3.Guardia
                 // ── 2) SUBIR: progresivo, nunca a saltos ────────────────────
                 _sospecha += EvidenciaActual * VelocidadSubida * dt;
             }
-            else
+            else if (!notadoCerca)
             {
                 EvidenciaActual = 0f;
 

@@ -2444,7 +2444,8 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
-  PingPong: 1
+  - {fileID: 0}
+  PingPong: 0
   EmpezarPorElMasCercano: 1
 --- !u!114 &2031718361710799158
 MonoBehaviour:
@@ -2460,8 +2461,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UDIT.IA3.Guardia.SensorVision
   Objetivo: {fileID: 0}
   TagObjetivo: Player
-  Alcance: 15
+  Alcance: 16
   AnguloVision: 70
+  AnguloPeriferico: 160
+  AlcancePeriferico: 8
+  RitmoDirecta: 1
+  RitmoPeriferica: 0.35
   Ojos: {fileID: 8415529584472244736}
   CapasQueOcluyen:
     serializedVersion: 2
@@ -2469,20 +2474,26 @@ MonoBehaviour:
   AlturaCabeza: 1.6
   AlturaTorso: 0.9
   AlturaPies: 0.1
-  VelocidadSubida: 0.8
+  VelocidadSubida: 2.1
   VelocidadBajada: 0.08
-  UmbralSospecha: 0.35
-  UmbralAlerta: 0.8
+  UmbralSospecha: 0.25
+  UmbralAlerta: 0.75
   Histeresis: 0.1
   DistanciaCercana: 2
   VelocidadMuyLlamativa: 5
-  MinimoDistancia: 0.2
+  MinimoDistancia: 0.01
   MinimoAngulo: 0.3
   MinimoMovimiento: 0.4
   TiempoGracia: 0.25
   RetardoOlvido: 1.5
   Nervio: 0.25
   MaxPerdidasNervio: 3
+  UsarProximidad: 1
+  RadioProximidad: 1.8
+  MultiplicadorRadioAgachado: 0.6
+  ProximidadRequiereLineaDirecta: 1
+  VelocidadSubidaProximidad: 0.5
+  ProximidadAlertaInstantanea: 0
 --- !u!114 &2376116234265865937
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2533,6 +2544,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UDIT.IA3.Guardia.GuardiaGizmos
   DibujarCono: 1
+  DibujarPeriferica: 1
+  DibujarProximidad: 1
   DibujarSospecha: 1
   DibujarUltimaPos: 1
 --- !u!114 &4889429525727953635
@@ -2551,7 +2564,7 @@ MonoBehaviour:
   balas: 27
   timepoRecarga: 3
   recargando: 0
-  prefabBala: {fileID: -4561760674004908953, guid: 987d3fae4b9ecce4982ade5eae300dfb, type: 3}
+  prefabBala: {fileID: 235787381227784641, guid: 94ae6be812fa3da4a94e829ab5c948e1, type: 3}
   puntoDisparo: {fileID: 4899923033613140272}
   cadencia: 0.5
   alturaApuntado: 1
@@ -2560,7 +2573,7 @@ MonoBehaviour:
   dispersionBase: 1
   dispersionPorMetro: 0.8
   dispersionMax: 12
-  buenaPunteria: 0
+  buenaPunteria: 1
 --- !u!95 &5646365273808456603
 Animator:
   serializedVersion: 7
